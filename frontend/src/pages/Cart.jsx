@@ -15,124 +15,180 @@ const Cart = () => {
 
   if (cart.length === 0) {
     return (
-      <div class="container py-5 text-center">
-        <div class="card shadow-sm border-0 p-5 mx-auto" style={{ maxWidth: '500px' }}>
-          <img src="/Images/empty-cart.png" alt="Empty Cart" class="mx-auto mb-4" style={{ width: '150px' }} />
-          <h4 class="fw-bold">Your Cart is Empty</h4>
-          <p class="text-muted small">Looks like you haven't added anything to your cart yet.</p>
-          <Link to="/products" class="btn btn-primary fw-semibold mt-3">Start Shopping Now</Link>
+      <div className="container py-5 d-flex justify-content-center align-items-center" style={{ minHeight: '65vh' }}>
+        <div className="empty-state-card" style={{ maxWidth: 420, width: '100%' }}>
+          <div style={{
+            width: 90, height: 90, borderRadius: '50%',
+            background: 'linear-gradient(135deg, #eef2ff, #e0e7ff)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            margin: '0 auto 20px',
+          }}>
+            <i className="fa-solid fa-cart-shopping" style={{ fontSize: '2.2rem', color: '#6366f1' }}></i>
+          </div>
+          <h4 className="fw-bold mb-2">Your Cart is Empty</h4>
+          <p style={{ color: '#64748b', fontSize: '0.9rem' }}>Looks like you haven't added anything yet. Browse our store!</p>
+          <Link to="/products" className="btn btn-primary fw-semibold mt-3 px-4">
+            <i className="fa-solid fa-store me-2"></i>Start Shopping
+          </Link>
         </div>
       </div>
     );
   }
 
   return (
-    <div class="container py-5">
-      <h3 class="fw-bold mb-4"><i class="fa-solid fa-cart-shopping text-primary me-2"></i>Shopping Cart</h3>
+    <div className="container py-5">
+      {/* Page title */}
+      <div className="d-flex align-items-center gap-3 mb-4">
+        <div style={{
+          width: 42, height: 42, borderRadius: '12px',
+          background: 'linear-gradient(135deg, #6366f1, #4338ca)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+        }}>
+          <i className="fa-solid fa-bag-shopping text-white" style={{ fontSize: '1rem' }}></i>
+        </div>
+        <div>
+          <h3 className="fw-bold mb-0">Shopping Cart</h3>
+          <p className="mb-0" style={{ fontSize: '0.83rem', color: '#64748b' }}>
+            {cart.reduce((s, i) => s + i.quantity, 0)} items in your cart
+          </p>
+        </div>
+      </div>
 
-      <div class="row g-4">
-        {/* Cart Items List */}
-        <div class="col-lg-8">
-          <div class="card shadow-sm border-0 rounded-3">
-            <div class="card-body p-0">
-              <ul class="list-group list-group-flush">
-                {cart.map((item) => {
-                  const unitDiscountPrice = Math.round(item.product.price - (item.product.price * item.product.discount) / 100);
-                  return (
-                    <li key={item.product.pid} class="list-group-item p-4">
-                      <div class="row align-items-center">
-                        <div class="col-3 col-md-2 text-center">
-                          <img
-                            src={item.product.image ? `/Images/${item.product.image}` : '/Images/product.png'}
-                            alt={item.product.name}
-                            class="img-fluid rounded"
-                            style={{ maxHeight: '80px', objectFit: 'contain' }}
-                            onError={(e) => { e.target.src = '/Images/product.png'; }}
-                          />
-                        </div>
-                        <div class="col-9 col-md-5 mb-2 mb-md-0">
-                          <h6 class="fw-bold mb-1">{item.product.name}</h6>
-                          <div class="text-muted small mb-1">
-                            Price: ₹{unitDiscountPrice.toLocaleString()} {item.product.discount > 0 && <span class="text-success ms-1">({item.product.discount}% OFF)</span>}
-                          </div>
-                        </div>
-                        <div class="col-6 col-md-3">
-                          <div class="input-group input-group-sm">
-                            <button
-                              class="btn btn-outline-secondary"
-                              onClick={() => updateCartQuantity(item.product.pid, item.quantity - 1)}
-                            >
-                              -
-                            </button>
-                            <input
-                              type="text"
-                              class="form-control text-center"
-                              value={item.quantity}
-                              readOnly
-                            />
-                            <button
-                              class="btn btn-outline-secondary"
-                              onClick={() => updateCartQuantity(item.product.pid, item.quantity + 1)}
-                            >
-                              +
-                            </button>
-                          </div>
-                        </div>
-                        <div class="col-6 col-md-2 text-end">
-                          <div class="fw-bold mb-2">₹{(unitDiscountPrice * item.quantity).toLocaleString()}</div>
-                          <button
-                            class="btn btn-outline-danger btn-sm"
-                            onClick={() => removeFromCart(item.product.pid)}
-                            title="Remove item"
-                          >
-                            <i class="fa-solid fa-trash"></i>
-                          </button>
-                        </div>
+      <div className="row g-4">
+        {/* ── Cart Items ── */}
+        <div className="col-lg-8">
+          <div className="card p-0" style={{ borderRadius: '18px', overflow: 'hidden' }}>
+            {cart.map((item, idx) => {
+              const unitPrice = Math.round(item.product.price - (item.product.price * item.product.discount) / 100);
+              return (
+                <div
+                  key={item.product.pid}
+                  className="p-4"
+                  style={{
+                    borderBottom: idx < cart.length - 1 ? '1px solid #f1f5f9' : 'none',
+                    transition: 'background 0.2s',
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#fafbff'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                >
+                  <div className="row align-items-center g-3">
+                    {/* Image */}
+                    <div className="col-3 col-md-2">
+                      <div style={{
+                        background: '#f8fafc', borderRadius: '12px',
+                        padding: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        height: '72px',
+                      }}>
+                        <img
+                          src={item.product.image ? `/Images/${item.product.image}` : '/Images/product.png'}
+                          alt={item.product.name}
+                          style={{ maxHeight: '56px', objectFit: 'contain', maxWidth: '100%' }}
+                          onError={(e) => { e.target.src = '/Images/product.png'; }}
+                        />
                       </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
+                    </div>
+
+                    {/* Name + price */}
+                    <div className="col-9 col-md-5">
+                      <h6 className="fw-bold mb-1" style={{ fontSize: '0.92rem', color: '#0f172a' }}>
+                        {item.product.name}
+                      </h6>
+                      <div style={{ fontSize: '0.82rem', color: '#64748b' }}>
+                        ₹{unitPrice.toLocaleString()} each
+                        {item.product.discount > 0 && (
+                          <span style={{
+                            marginLeft: 6, background: '#dcfce7', color: '#166534',
+                            borderRadius: '999px', padding: '2px 8px', fontSize: '0.72rem', fontWeight: 700,
+                          }}>
+                            {item.product.discount}% OFF
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Qty stepper */}
+                    <div className="col-6 col-md-3">
+                      <div className="qty-stepper">
+                        <button onClick={() => updateCartQuantity(item.product.pid, item.quantity - 1)}>−</button>
+                        <span className="qty-value">{item.quantity}</span>
+                        <button onClick={() => updateCartQuantity(item.product.pid, item.quantity + 1)}>+</button>
+                      </div>
+                    </div>
+
+                    {/* Total + Remove */}
+                    <div className="col-6 col-md-2 text-end">
+                      <div className="fw-bold mb-2" style={{ color: '#0f172a', fontSize: '0.95rem' }}>
+                        ₹{(unitPrice * item.quantity).toLocaleString()}
+                      </div>
+                      <button
+                        onClick={() => removeFromCart(item.product.pid)}
+                        title="Remove"
+                        style={{
+                          background: '#fff1f2', border: '1px solid #fecdd3',
+                          borderRadius: '8px', color: '#e11d48',
+                          width: 32, height: 32, padding: 0,
+                          cursor: 'pointer', display: 'inline-flex',
+                          alignItems: 'center', justifyContent: 'center',
+                          transition: 'all 0.2s ease',
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.background = '#e11d48'; e.currentTarget.style.color = '#fff'; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = '#fff1f2'; e.currentTarget.style.color = '#e11d48'; }}
+                      >
+                        <i className="fa-solid fa-trash" style={{ fontSize: '0.75rem' }}></i>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 
-        {/* Order Summary Sidebar */}
-        <div class="col-lg-4">
-          <div class="card shadow-sm border-0 rounded-3">
-            <div class="card-header bg-white py-3 border-bottom">
-              <h5 class="fw-bold mb-0">Price Details</h5>
-            </div>
-            <div class="card-body p-4">
-              <div class="d-flex justify-content-between mb-2">
-                <span class="text-muted">Total Items</span>
-                <span class="fw-semibold">{cart.reduce((s, i) => s + i.quantity, 0)}</span>
-              </div>
-              <div class="d-flex justify-content-between mb-2">
-                <span class="text-muted">Original Price</span>
-                <span>₹{Math.round(totalOriginal).toLocaleString()}</span>
-              </div>
-              <div class="d-flex justify-content-between mb-2">
-                <span class="text-muted">Discount Savings</span>
-                <span class="text-success">- ₹{Math.round(totalDiscount).toLocaleString()}</span>
-              </div>
-              <div class="d-flex justify-content-between mb-3">
-                <span class="text-muted">Delivery Charges</span>
-                <span class="text-success fw-semibold">FREE</span>
-              </div>
-              <hr />
-              <div class="d-flex justify-content-between mb-4 fs-5 fw-bold">
-                <span>Total Amount</span>
-                <span class="text-primary">₹{grandTotal.toLocaleString()}</span>
-              </div>
+        {/* ── Order Summary ── */}
+        <div className="col-lg-4">
+          <div className="card p-4" style={{ borderRadius: '18px', position: 'sticky', top: '90px' }}>
+            <h5 className="fw-bold mb-4" style={{ color: '#0f172a' }}>Order Summary</h5>
 
-              <button
-                class="btn btn-primary btn-lg w-100 fw-semibold"
-                onClick={() => navigate('/checkout')}
-              >
-                Proceed to Checkout <i class="fa-solid fa-arrow-right ms-2"></i>
-              </button>
+            {/* Savings banner */}
+            {totalDiscount > 0 && (
+              <div className="savings-banner">
+                <span><i className="fa-solid fa-tag me-2"></i>Your savings</span>
+                <span className="fw-bold">₹{Math.round(totalDiscount).toLocaleString()}</span>
+              </div>
+            )}
+
+            {/* Price rows */}
+            {[
+              { label: 'Subtotal', value: `₹${Math.round(totalOriginal).toLocaleString()}`, muted: true },
+              { label: 'Discount', value: `− ₹${Math.round(totalDiscount).toLocaleString()}`, green: true },
+              { label: 'Delivery', value: 'FREE', green: true },
+            ].map((row) => (
+              <div key={row.label} className="d-flex justify-content-between mb-2" style={{ fontSize: '0.9rem' }}>
+                <span style={{ color: '#64748b' }}>{row.label}</span>
+                <span style={{ fontWeight: 600, color: row.green ? '#059669' : '#0f172a' }}>{row.value}</span>
+              </div>
+            ))}
+
+            <hr style={{ borderColor: '#f1f5f9', margin: '12px 0' }} />
+
+            <div className="d-flex justify-content-between mb-4">
+              <span style={{ fontWeight: 800, fontSize: '1.05rem', color: '#0f172a' }}>Total</span>
+              <span style={{
+                fontWeight: 800, fontSize: '1.2rem',
+                background: 'linear-gradient(135deg, #0f172a, #312e81)',
+                WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+              }}>
+                ₹{grandTotal.toLocaleString()}
+              </span>
             </div>
+
+            <button
+              className="btn btn-primary w-100 py-3 fw-bold"
+              onClick={() => navigate('/checkout')}
+              style={{ borderRadius: '14px', fontSize: '1rem' }}
+            >
+              Proceed to Checkout <i className="fa-solid fa-arrow-right ms-2"></i>
+            </button>
           </div>
         </div>
       </div>

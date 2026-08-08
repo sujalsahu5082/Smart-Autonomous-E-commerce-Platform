@@ -6,21 +6,39 @@ const CategoryStrip = () => {
   const { categories } = useStore();
 
   return (
-    <div class="container-fluid px-4 py-3 bg-white border-bottom shadow-sm">
-      <div class="row row-cols-2 row-cols-sm-3 row-cols-md-7 g-3 text-center justify-content-center">
-        {categories.map((cat) => (
-          <div class="col" key={cat.cid}>
-            <Link to={`/products?category=${cat.cid}`} class="category-item">
+    <div className="category-strip-wrapper">
+      <div className="container py-3">
+        <div className="d-flex align-items-center gap-3 flex-wrap justify-content-center">
+          {/* "All" pill */}
+          <Link
+            to="/products"
+            className="category-item"
+            style={{ minWidth: '70px' }}
+          >
+            <div style={{
+              width: '52px', height: '52px',
+              background: 'linear-gradient(135deg, #6366f1, #4338ca)',
+              borderRadius: '14px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              marginBottom: '8px',
+            }}>
+              <i className="fa-solid fa-store text-white" style={{ fontSize: '1.3rem' }}></i>
+            </div>
+            <span>All</span>
+          </Link>
+
+          {categories.map((cat) => (
+            <Link to={`/products?category=${cat.cid}`} key={cat.cid} className="category-item">
               <img
                 src={cat.image ? `/Images/${cat.image}` : '/Images/categories.png'}
                 alt={cat.name}
-                class="cat-img"
+                className="cat-img"
                 onError={(e) => { e.target.src = '/Images/categories.png'; }}
               />
-              <span class="fw-semibold small">{cat.name}</span>
+              <span>{cat.name}</span>
             </Link>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );

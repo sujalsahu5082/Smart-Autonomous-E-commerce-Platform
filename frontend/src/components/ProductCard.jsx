@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useStore } from '../context/StoreContext';
 
 const ProductCard = ({ product }) => {
@@ -10,70 +10,76 @@ const ProductCard = ({ product }) => {
   const isWish = isInWishlist(product.pid);
 
   return (
-    <div class="col">
-      <div class="card h-100 cus-card shadow-sm position-relative">
+    <div className="col">
+      <div className="card h-100 cus-card position-relative">
+
         {/* Wishlist Heart Button */}
         <button
-          class={`btn btn-light btn-sm position-absolute top-0 end-0 m-2 rounded-circle shadow-sm ${isWish ? 'text-danger' : 'text-muted'}`}
-          style={{ width: '34px', height: '34px', zIndex: 5 }}
+          className={`wishlist-btn ${isWish ? 'text-danger' : 'text-muted'}`}
           onClick={() => toggleWishlist(product)}
           title={isWish ? 'Remove from wishlist' : 'Add to wishlist'}
         >
-          <i class={`fa-solid fa-heart ${isWish ? '' : 'fa-regular'}`}></i>
+          <i className={`fa-heart ${isWish ? 'fa-solid' : 'fa-regular'}`} style={{ fontSize: '0.95rem' }}></i>
         </button>
+
+        {/* Discount ribbon */}
+        {product.discount > 0 && (
+          <div style={{
+            position: 'absolute', top: 12, left: 12, zIndex: 4,
+            background: 'linear-gradient(135deg, #ef4444, #dc2626)',
+            color: '#fff', fontSize: '0.7rem', fontWeight: 700,
+            padding: '3px 9px', borderRadius: '6px',
+            boxShadow: '0 2px 8px rgba(239,68,68,0.35)',
+          }}>
+            -{product.discount}%
+          </div>
+        )}
 
         {/* Product Image */}
         <div
-          class="p-3 text-center cursor-pointer bg-white rounded-top"
+          className="card-img-top-wrapper"
           onClick={() => navigate(`/product/${product.pid}`)}
-          style={{ height: '200px', cursor: 'pointer' }}
         >
           <img
             src={product.image ? `/Images/${product.image}` : '/Images/product.png'}
             alt={product.name}
-            class="img-fluid h-100"
-            style={{ objectFit: 'contain' }}
             onError={(e) => { e.target.src = '/Images/product.png'; }}
           />
         </div>
 
         {/* Product Details */}
-        <div class="card-body d-flex flex-direction-column justify-content-between p-3">
-          <div>
-            <h6
-              class="card-title text-truncate fw-bold mb-1"
-              title={product.name}
-              style={{ cursor: 'pointer' }}
-              onClick={() => navigate(`/product/${product.pid}`)}
-            >
-              {product.name}
-            </h6>
-            <p class="card-text text-muted small text-truncate mb-2">
-              {product.description}
-            </p>
+        <div className="card-body d-flex flex-column p-3 pt-2">
+          <h6
+            className="fw-bold mb-1 text-truncate"
+            title={product.name}
+            style={{ cursor: 'pointer', fontSize: '0.92rem', color: '#0f172a' }}
+            onClick={() => navigate(`/product/${product.pid}`)}
+          >
+            {product.name}
+          </h6>
+          <p className="text-truncate mb-3" style={{ fontSize: '0.8rem', color: '#64748b' }}>
+            {product.description}
+          </p>
+
+          {/* Price */}
+          <div className="d-flex align-items-center gap-2 mb-3 flex-wrap">
+            <span className="real-price">₹{discountPrice.toLocaleString()}</span>
+            {product.discount > 0 && (
+              <>
+                <span className="product-price">₹{product.price.toLocaleString()}</span>
+                <span className="product-discount">{product.discount}% off</span>
+              </>
+            )}
           </div>
 
-          <div>
-            {/* Price Section */}
-            <div class="d-flex align-items-baseline gap-2 mb-3">
-              <span class="real-price">₹{discountPrice.toLocaleString()}</span>
-              {product.discount > 0 && (
-                <>
-                  <span class="product-price">₹{product.price.toLocaleString()}</span>
-                  <span class="product-discount">{product.discount}% off</span>
-                </>
-              )}
-            </div>
-
-            {/* Action Buttons */}
-            <div class="d-grid gap-2">
-              <button
-                class="btn btn-primary btn-sm fw-semibold"
-                onClick={() => addToCart(product)}
-              >
-                <i class="fa-solid fa-cart-plus me-1"></i>Add to Cart
-              </button>
-            </div>
+          {/* Add to Cart */}
+          <div className="mt-auto">
+            <button
+              className="btn-add-cart"
+              onClick={() => addToCart(product)}
+            >
+              <i className="fa-solid fa-bag-shopping me-2"></i>Add to Cart
+            </button>
           </div>
         </div>
       </div>
