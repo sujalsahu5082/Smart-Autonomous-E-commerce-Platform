@@ -25,77 +25,86 @@ const Navbar = ({ onOpenAddCategory, onOpenAddProduct }) => {
   };
 
   return (
-    <nav class="navbar navbar-expand-lg navbar-dark custom-color shadow-sm sticky-top" data-bs-theme="dark">
-      <div class="container">
-        <Link class="navbar-brand fw-bold fs-4 d-flex align-items-center" to="/">
-          <i class="fa-sharp fa-solid fa-house me-2"></i>EazyDeals
+    <nav className="navbar navbar-expand-lg navbar-dark custom-color sticky-top" data-bs-theme="dark">
+      <div className="container">
+        {/* Brand */}
+        <Link className="navbar-brand text-white" to="/">
+          <i className="fa-solid fa-bolt me-1" style={{ color: '#fbbf24' }}></i>
+          Smart E-Commerce
         </Link>
+
         <button
-          class="navbar-toggler"
+          className="navbar-toggler border-0"
           type="button"
           data-bs-toggle="collapse"
           data-bs-target="#navContent"
+          style={{ boxShadow: 'none' }}
         >
-          <span class="navbar-toggler-icon"></span>
+          <span className="navbar-toggler-icon"></span>
         </button>
 
-        <div class="collapse navbar-collapse" id="navContent">
+        <div className="collapse navbar-collapse" id="navContent">
           {activeAdmin ? (
-            /* Admin Navbar */
-            <ul class="navbar-nav ms-auto align-items-center">
-              <li class="nav-item">
+            /* ── Admin Navbar ── */
+            <ul className="navbar-nav ms-auto align-items-center gap-1">
+              <li className="nav-item">
                 <button
                   type="button"
-                  class="btn btn-outline-light btn-sm me-2 my-1"
+                  className="btn btn-sm fw-semibold me-1"
+                  style={{ background: 'rgba(255,255,255,0.15)', color: '#ffffff', border: '1px solid rgba(255,255,255,0.25)', borderRadius: '8px' }}
                   onClick={onOpenAddCategory}
                 >
-                  <i class="fa-solid fa-plus fa-xs me-1"></i>Add Category
+                  <i className="fa-solid fa-plus fa-xs me-1"></i>Category
                 </button>
               </li>
-              <li class="nav-item">
+              <li className="nav-item">
                 <button
                   type="button"
-                  class="btn btn-outline-light btn-sm me-3 my-1"
+                  className="btn btn-sm fw-semibold me-2"
+                  style={{ background: 'rgba(251,191,36,0.2)', color: '#fbbf24', border: '1px solid rgba(251,191,36,0.35)', borderRadius: '8px' }}
                   onClick={onOpenAddProduct}
                 >
-                  <i class="fa-solid fa-plus fa-xs me-1"></i>Add Product
+                  <i className="fa-solid fa-plus fa-xs me-1"></i>Product
                 </button>
               </li>
-              <li class="nav-item me-3">
-                <Link class="nav-link text-white fw-semibold" to="/admin">
-                  <i class="fa-solid fa-user-shield me-1"></i>{activeAdmin.name}
+              <li className="nav-item">
+                <Link className="nav-link text-white fw-semibold" to="/admin">
+                  <i className="fa-solid fa-user-shield me-1" style={{ color: '#a5b4fc' }}></i>
+                  {activeAdmin.name}
                 </Link>
               </li>
-              <li class="nav-item">
-                <a class="nav-link text-white cursor-pointer" href="#" onClick={handleLogout}>
-                  <i class="fa-solid fa-user-slash me-1"></i>Logout
+              <li className="nav-item">
+                <a className="nav-link text-white" href="#" onClick={handleLogout}>
+                  <i className="fa-solid fa-right-from-bracket me-1"></i>Logout
                 </a>
               </li>
             </ul>
           ) : (
-            /* User / Guest Navbar */
+            /* ── User / Guest Navbar ── */
             <>
               {/* Category Dropdown */}
-              <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <li class="nav-item dropdown">
+              <ul className="navbar-nav me-auto mb-2 mb-lg-0">
+                <li className="nav-item dropdown">
                   <a
-                    class="nav-link dropdown-toggle active"
+                    className="nav-link dropdown-toggle fw-semibold"
                     href="#"
                     role="button"
                     data-bs-toggle="dropdown"
                   >
+                    <i className="fa-solid fa-grid-2 me-1" style={{ fontSize: '0.8rem' }}></i>
                     Categories
                   </a>
-                  <ul class="dropdown-menu">
+                  <ul className="dropdown-menu">
                     <li>
-                      <Link class="dropdown-item" to="/products">
-                        All Products
+                      <Link className="dropdown-item" to="/products">
+                        <i className="fa-solid fa-store me-2 text-primary"></i>All Products
                       </Link>
                     </li>
-                    <li><hr class="dropdown-divider" /></li>
+                    <li><hr className="dropdown-divider" /></li>
                     {categories.map((c) => (
                       <li key={c.cid}>
-                        <Link class="dropdown-item" to={`/products?category=${c.cid}`}>
+                        <Link className="dropdown-item" to={`/products?category=${c.cid}`}>
+                          <i className="fa-solid fa-tag me-2" style={{ color: '#818cf8', fontSize: '0.8rem' }}></i>
                           {c.name}
                         </Link>
                       </li>
@@ -105,66 +114,86 @@ const Navbar = ({ onOpenAddCategory, onOpenAddProduct }) => {
               </ul>
 
               {/* Search Bar */}
-              <form class="d-flex mx-auto col-12 col-lg-5 my-2 my-lg-0" onSubmit={handleSearch}>
-                <div class="input-group">
+              <form className="d-flex mx-auto col-12 col-lg-5 my-2 my-lg-0" onSubmit={handleSearch}>
+                <div className="input-group">
                   <input
                     type="search"
-                    class="form-control"
+                    className="form-control"
                     placeholder="Search products, brands and more..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
-                  <button class="btn btn-warning text-dark fw-semibold" type="submit">
-                    <i class="fa-solid fa-magnifying-glass me-1"></i>Search
+                  <button className="btn btn-warning fw-bold" type="submit">
+                    <i className="fa-solid fa-magnifying-glass"></i>
                   </button>
                 </div>
               </form>
 
               {/* User Section */}
-              <ul class="navbar-nav ms-auto align-items-center">
+              <ul className="navbar-nav ms-auto align-items-center gap-1">
                 {activeUser ? (
                   <>
-                    <li class="nav-item pe-2">
-                      <Link class="nav-link position-relative active text-white" to="/cart">
-                        <i class="fa-solid fa-cart-shopping me-1"></i> Cart
+                    <li className="nav-item">
+                      <Link className="nav-link position-relative text-white" to="/cart">
+                        <i className="fa-solid fa-bag-shopping me-1"></i>Cart
                         {cartCount > 0 && (
-                          <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                          <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style={{ fontSize: '0.65rem' }}>
                             {cartCount}
                           </span>
                         )}
                       </Link>
                     </li>
-                    <li class="nav-item pe-2">
-                      <Link class="nav-link active text-white" to="/wishlist">
-                        <i class="fa-solid fa-heart me-1"></i> Wishlist
+                    <li className="nav-item">
+                      <Link className="nav-link text-white" to="/wishlist">
+                        <i className="fa-solid fa-heart me-1"></i>Wishlist
                       </Link>
                     </li>
-                    <li class="nav-item pe-2">
-                      <Link class="nav-link active text-white fw-semibold" to="/profile">
-                        <i class="fa-solid fa-user me-1"></i>{activeUser.name}
+                    <li className="nav-item">
+                      <Link className="nav-link fw-semibold" to="/profile"
+                        style={{
+                          background: 'rgba(255,255,255,0.12)',
+                          borderRadius: '20px',
+                          padding: '6px 14px',
+                          border: '1px solid rgba(255,255,255,0.2)',
+                          color: '#ffffff',
+                          fontSize: '0.88rem',
+                        }}
+                      >
+                        <i className="fa-solid fa-circle-user me-1" style={{ color: '#a5b4fc' }}></i>
+                        {activeUser.name.split(' ')[0]}
                       </Link>
                     </li>
-                    <li class="nav-item">
-                      <a class="nav-link active text-white" href="#" onClick={handleLogout}>
-                        <i class="fa-solid fa-user-slash me-1"></i>Logout
+                    <li className="nav-item">
+                      <a className="nav-link text-white opacity-75" href="#" onClick={handleLogout} style={{ fontSize: '0.88rem' }}>
+                        <i className="fa-solid fa-right-from-bracket me-1"></i>Logout
                       </a>
                     </li>
                   </>
                 ) : (
                   <>
-                    <li class="nav-item pe-2">
-                      <Link class="nav-link active text-white" to="/register">
-                        <i class="fa-solid fa-user-plus me-1"></i>Register
+                    <li className="nav-item">
+                      <Link className="nav-link text-white" to="/register">
+                        <i className="fa-solid fa-user-plus me-1"></i>Register
                       </Link>
                     </li>
-                    <li class="nav-item pe-2">
-                      <Link class="nav-link active text-white" to="/login">
-                        <i class="fa-solid fa-user-lock me-1"></i>Login
+                    <li className="nav-item">
+                      <Link
+                        className="nav-link fw-semibold"
+                        to="/login"
+                        style={{
+                          background: 'rgba(255,255,255,0.15)',
+                          borderRadius: '20px',
+                          padding: '6px 16px',
+                          border: '1px solid rgba(255,255,255,0.25)',
+                          color: '#ffffff',
+                        }}
+                      >
+                        <i className="fa-solid fa-right-to-bracket me-1"></i>Login
                       </Link>
                     </li>
-                    <li class="nav-item">
-                      <Link class="nav-link active text-white" to="/adminlogin">
-                        <i class="fa-solid fa-user-shield me-1"></i>Admin
+                    <li className="nav-item">
+                      <Link className="nav-link text-white opacity-75" to="/adminlogin" style={{ fontSize: '0.85rem' }}>
+                        <i className="fa-solid fa-user-shield me-1"></i>Admin
                       </Link>
                     </li>
                   </>

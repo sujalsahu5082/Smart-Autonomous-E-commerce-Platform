@@ -8,20 +8,26 @@ const ProductDetail = () => {
   const { products, categories, addToCart, toggleWishlist, isInWishlist } = useStore();
   const [qty, setQty] = useState(1);
 
-  const product = products.find(p => p.pid === Number(id));
+  const product = products.find((p) => p.pid === Number(id));
 
   if (!product) {
     return (
-      <div class="container py-5 text-center">
-        <h4>Product Not Found</h4>
-        <button class="btn btn-primary mt-3" onClick={() => navigate('/products')}>Back to Products</button>
+      <div className="container py-5 text-center">
+        <div className="empty-state-card" style={{ maxWidth: 400, margin: '0 auto' }}>
+          <i className="fa-solid fa-box-open" style={{ fontSize: '3rem', color: '#94a3b8' }}></i>
+          <h4 className="fw-bold mt-3">Product Not Found</h4>
+          <button className="btn btn-primary mt-3" onClick={() => navigate('/products')}>
+            <i className="fa-solid fa-arrow-left me-2"></i>Back to Products
+          </button>
+        </div>
       </div>
     );
   }
 
-  const category = categories.find(c => c.cid === product.cid);
+  const category = categories.find((c) => c.cid === product.cid);
   const discountPrice = Math.round(product.price - (product.price * product.discount) / 100);
   const isWish = isInWishlist(product.pid);
+  const savings = product.price - discountPrice;
 
   const handleBuyNow = () => {
     addToCart(product, qty);
@@ -29,94 +35,117 @@ const ProductDetail = () => {
   };
 
   return (
-    <div class="container py-5">
-      <div class="card shadow border-0 rounded-3 overflow-hidden">
-        <div class="row g-0">
-          {/* Product Image Column */}
-          <div class="col-md-5 p-4 text-center bg-white border-end d-flex align-items-center justify-content-center">
+    <div className="container py-5">
+      <div className="card" style={{ borderRadius: '22px', overflow: 'hidden', border: '1.5px solid #e2e8f0' }}>
+        <div className="row g-0">
+
+          {/* ── Image Panel ── */}
+          <div className="col-md-5 d-flex align-items-center justify-content-center p-5"
+            style={{ background: 'radial-gradient(circle at center, #eef2ff 0%, #f8fafc 100%)', minHeight: '380px' }}>
             <img
               src={product.image ? `/Images/${product.image}` : '/Images/product.png'}
               alt={product.name}
-              class="img-fluid"
-              style={{ maxHeight: '350px', objectFit: 'contain' }}
+              style={{ maxHeight: '300px', maxWidth: '100%', objectFit: 'contain' }}
               onError={(e) => { e.target.src = '/Images/product.png'; }}
             />
           </div>
 
-          {/* Product Info Column */}
-          <div class="col-md-7 p-4 bg-white d-flex flex-column justify-content-between">
-            <div>
-              <span class="badge bg-primary-subtle text-primary mb-2">
+          {/* ── Info Panel ── */}
+          <div className="col-md-7 p-4 p-md-5 d-flex flex-column" style={{ background: '#ffffff' }}>
+
+            {/* Category + Stock badges */}
+            <div className="d-flex align-items-center gap-2 mb-3 flex-wrap">
+              <span style={{
+                background: '#eef2ff', color: '#4f46e5',
+                borderRadius: '999px', fontSize: '0.75rem', fontWeight: 700,
+                padding: '4px 14px', border: '1px solid #c7d2fe',
+              }}>
                 {category ? category.name : 'General'}
               </span>
-              <h3 class="fw-bold text-dark">{product.name}</h3>
+              <span style={{
+                background: product.quantity > 0 ? '#f0fdf4' : '#fff1f2',
+                color: product.quantity > 0 ? '#166534' : '#9f1239',
+                borderRadius: '999px', fontSize: '0.75rem', fontWeight: 700,
+                padding: '4px 14px',
+                border: `1px solid ${product.quantity > 0 ? '#bbf7d0' : '#fecdd3'}`,
+              }}>
+                <i className={`fa-solid fa-circle me-1`} style={{ fontSize: '0.5rem' }}></i>
+                {product.quantity > 0 ? `In Stock (${product.quantity})` : 'Out of Stock'}
+              </span>
+            </div>
 
-              <div class="d-flex align-items-baseline gap-3 my-3">
-                <span class="fs-2 fw-bold text-dark">₹{discountPrice.toLocaleString()}</span>
+            <h2 className="fw-bold mb-3" style={{ color: '#0f172a', lineHeight: 1.3 }}>{product.name}</h2>
+
+            {/* Price block */}
+            <div className="p-3 mb-3 rounded-3" style={{ background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+              <div className="d-flex align-items-baseline gap-3 flex-wrap mb-2">
+                <span style={{
+                  fontSize: '2.2rem', fontWeight: 800,
+                  background: 'linear-gradient(135deg, #0f172a, #312e81)',
+                  WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+                }}>
+                  ₹{discountPrice.toLocaleString()}
+                </span>
                 {product.discount > 0 && (
                   <>
-                    <span class="fs-5 text-muted text-decoration-line-through">₹{product.price.toLocaleString()}</span>
-                    <span class="fs-6 fw-semibold text-success">{product.discount}% off</span>
+                    <span style={{ fontSize: '1.1rem', textDecoration: 'line-through', color: '#94a3b8', fontWeight: 500 }}>
+                      ₹{product.price.toLocaleString()}
+                    </span>
+                    <span style={{
+                      background: 'linear-gradient(135deg, #10b981, #059669)',
+                      color: '#fff', borderRadius: '999px',
+                      padding: '4px 14px', fontSize: '0.82rem', fontWeight: 700,
+                    }}>
+                      {product.discount}% OFF
+                    </span>
                   </>
                 )}
               </div>
+              {savings > 0 && (
+                <p style={{ fontSize: '0.85rem', color: '#059669', fontWeight: 600, margin: 0 }}>
+                  <i className="fa-solid fa-tag me-1"></i>
+                  You save ₹{savings.toLocaleString()} on this order
+                </p>
+              )}
+            </div>
 
-              <p class="text-muted leading-relaxed">{product.description}</p>
+            <p style={{ color: '#475569', fontSize: '0.93rem', lineHeight: 1.75, marginBottom: '1.5rem' }}>
+              {product.description}
+            </p>
 
-              <div class="my-3">
-                <span class={`badge ${product.quantity > 0 ? 'bg-success' : 'bg-danger'} px-3 py-2 fs-6`}>
-                  {product.quantity > 0 ? `In Stock (${product.quantity} units available)` : 'Out of Stock'}
-                </span>
-              </div>
-
-              {/* Quantity Selector */}
-              <div class="d-flex align-items-center gap-3 my-4">
-                <label class="fw-semibold">Quantity:</label>
-                <div class="input-group" style={{ width: '130px' }}>
-                  <button
-                    class="btn btn-outline-secondary"
-                    onClick={() => setQty(Math.max(1, qty - 1))}
-                  >
-                    -
-                  </button>
-                  <input
-                    type="text"
-                    class="form-control text-center"
-                    value={qty}
-                    readOnly
-                  />
-                  <button
-                    class="btn btn-outline-secondary"
-                    onClick={() => setQty(Math.min(product.quantity, qty + 1))}
-                  >
-                    +
-                  </button>
-                </div>
+            {/* Quantity Stepper */}
+            <div className="d-flex align-items-center gap-3 mb-4">
+              <span style={{ fontWeight: 600, fontSize: '0.9rem', color: '#374151' }}>Qty:</span>
+              <div className="qty-stepper">
+                <button onClick={() => setQty(Math.max(1, qty - 1))}>−</button>
+                <span className="qty-value">{qty}</span>
+                <button onClick={() => setQty(Math.min(product.quantity, qty + 1))}>+</button>
               </div>
             </div>
 
             {/* Action Buttons */}
-            <div class="d-flex flex-wrap gap-3 mt-4">
+            <div className="d-flex flex-wrap gap-3">
               <button
-                class="btn btn-primary btn-lg px-4 fw-semibold"
+                className="btn btn-primary fw-bold px-4 py-2"
                 onClick={() => addToCart(product, qty)}
+                style={{ borderRadius: '12px', fontSize: '0.92rem' }}
               >
-                <i class="fa-solid fa-cart-plus me-2"></i>Add to Cart
+                <i className="fa-solid fa-bag-shopping me-2"></i>Add to Cart
               </button>
-
               <button
-                class="btn btn-warning btn-lg px-4 text-dark fw-semibold"
+                className="btn btn-warning fw-bold px-4 py-2"
                 onClick={handleBuyNow}
+                style={{ borderRadius: '12px', fontSize: '0.92rem' }}
               >
-                <i class="fa-solid fa-bolt me-2"></i>Buy Now
+                <i className="fa-solid fa-bolt me-2"></i>Buy Now
               </button>
-
               <button
-                class={`btn btn-outline-danger btn-lg px-3 ${isWish ? 'active' : ''}`}
+                className={`btn btn-outline-danger fw-semibold px-3 py-2 ${isWish ? 'active' : ''}`}
                 onClick={() => toggleWishlist(product)}
+                style={{ borderRadius: '12px', fontSize: '0.92rem' }}
               >
-                <i class={`fa-solid fa-heart ${isWish ? '' : 'fa-regular'} me-1`}></i>
-                {isWish ? 'Saved in Wishlist' : 'Add to Wishlist'}
+                <i className={`fa-heart ${isWish ? 'fa-solid' : 'fa-regular'} me-1`}></i>
+                {isWish ? 'Saved' : 'Wishlist'}
               </button>
             </div>
           </div>

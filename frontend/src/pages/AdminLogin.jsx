@@ -6,7 +6,7 @@ const AdminLogin = () => {
   const { loginAdmin } = useStore();
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState('admin@eazydeals.com');
+  const [email, setEmail] = useState('admin@smartecommerce.com');
   const [password, setPassword] = useState('admin');
   const [error, setError] = useState('');
 
@@ -58,7 +58,7 @@ const AdminLogin = () => {
             </button>
           </form>
           <div class="text-center mt-3 text-muted extra-small">
-            Default credentials: admin@eazydeals.com / admin
+            Default credentials: admin@smartecommerce.com / admin
           </div>
         </div>
       </div>

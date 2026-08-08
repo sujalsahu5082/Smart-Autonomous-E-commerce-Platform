@@ -22,24 +22,44 @@ const Login = () => {
   };
 
   return (
-    <div class="container py-5 d-flex justify-content-center align-items-center" style={{ minHeight: '75vh' }}>
-      <div class="card shadow-lg border-0 rounded-4 overflow-hidden" style={{ maxWidth: '450px', width: '100%' }}>
-        <div class="card-header custom-color text-white text-center py-4 border-0">
-          <img src="/Images/login.png" alt="Login Icon" style={{ width: '60px' }} class="mb-2" />
-          <h4 class="fw-bold mb-0">Welcome Back</h4>
-          <p class="small text-white-50 mb-0">Login to access your account & orders</p>
+    <div
+      className="d-flex justify-content-center align-items-center"
+      style={{ minHeight: '85vh', background: 'linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%)' }}
+    >
+      <div className="card" style={{ maxWidth: 440, width: '100%', margin: '2rem 1rem', overflow: 'hidden', borderRadius: '24px', border: 'none', boxShadow: '0 20px 60px -10px rgba(79,70,229,0.2)' }}>
+
+        {/* Header Band */}
+        <div style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%)', padding: '36px 32px 28px', textAlign: 'center' }}>
+          <div style={{
+            width: 68, height: 68, borderRadius: '18px',
+            background: 'rgba(255,255,255,0.12)',
+            border: '1px solid rgba(255,255,255,0.2)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            margin: '0 auto 14px',
+            backdropFilter: 'blur(8px)',
+          }}>
+            <i className="fa-solid fa-right-to-bracket text-white" style={{ fontSize: '1.6rem' }}></i>
+          </div>
+          <h4 style={{ color: '#ffffff', fontWeight: 800, marginBottom: 4 }}>Welcome Back</h4>
+          <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.85rem', margin: 0 }}>Sign in to access your account & orders</p>
         </div>
-        <div class="card-body p-4 p-md-5">
-          {error && <div class="alert alert-danger py-2 text-center small">{error}</div>}
+
+        {/* Body */}
+        <div className="p-4 p-md-5" style={{ background: '#ffffff' }}>
+          {error && (
+            <div className="alert alert-danger mb-4">
+              <i className="fa-solid fa-circle-exclamation me-2"></i>{error}
+            </div>
+          )}
 
           <form onSubmit={handleSubmit}>
-            <div class="mb-3">
-              <label class="form-label fw-semibold">Email Address</label>
-              <div class="input-group">
-                <span class="input-group-text bg-light"><i class="fa-solid fa-envelope text-muted"></i></span>
+            <div className="mb-3">
+              <label className="form-label">Email Address</label>
+              <div className="input-group">
+                <span className="input-group-text"><i className="fa-solid fa-envelope"></i></span>
                 <input
                   type="email"
-                  class="form-control"
+                  className="form-control"
                   placeholder="name@example.com"
                   required
                   value={email}
@@ -48,17 +68,19 @@ const Login = () => {
               </div>
             </div>
 
-            <div class="mb-3">
-              <div class="d-flex justify-content-between">
-                <label class="form-label fw-semibold">Password</label>
-                <Link to="/forgot-password" class="small text-decoration-none text-primary">Forgot Password?</Link>
+            <div className="mb-4">
+              <div className="d-flex justify-content-between align-items-center mb-1">
+                <label className="form-label mb-0">Password</label>
+                <Link to="/forgot-password" style={{ fontSize: '0.82rem', color: '#4f46e5', fontWeight: 600, textDecoration: 'none' }}>
+                  Forgot Password?
+                </Link>
               </div>
-              <div class="input-group">
-                <span class="input-group-text bg-light"><i class="fa-solid fa-key text-muted"></i></span>
+              <div className="input-group">
+                <span className="input-group-text"><i className="fa-solid fa-lock"></i></span>
                 <input
                   type="password"
-                  class="form-control"
-                  placeholder="Enter password"
+                  className="form-control"
+                  placeholder="Enter your password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
@@ -66,14 +88,14 @@ const Login = () => {
               </div>
             </div>
 
-            <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold mt-3 shadow-sm">
-              Sign In <i class="fa-solid fa-arrow-right-to-bracket ms-2"></i>
+            <button type="submit" className="btn btn-primary w-100 py-3 fw-bold" style={{ borderRadius: '14px', fontSize: '1rem' }}>
+              Sign In <i className="fa-solid fa-arrow-right ms-2"></i>
             </button>
           </form>
 
-          <div class="text-center mt-4">
-            <span class="text-muted small">Don't have an account? </span>
-            <Link to="/register" class="fw-bold text-primary text-decoration-none small">Create New Account</Link>
+          <div className="text-center mt-4" style={{ fontSize: '0.87rem' }}>
+            <span style={{ color: '#64748b' }}>Don't have an account? </span>
+            <Link to="/register" style={{ color: '#4f46e5', fontWeight: 700, textDecoration: 'none' }}>Create Account</Link>
           </div>
         </div>
       </div>

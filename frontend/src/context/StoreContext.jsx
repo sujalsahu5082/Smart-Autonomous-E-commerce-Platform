@@ -96,14 +96,23 @@ const initialProducts = [
 ];
 
 const initialAdmins = [
-  { id: 1, name: 'Anirudh Bhagat', email: 'admin@eazydeals.com', password: 'admin', phone: '9876543210' }
+  { id: 1, name: 'Admin User', email: 'admin@smartecommerce.com', password: 'admin', phone: '9876543210' }
 ];
 
 export const StoreProvider = ({ children }) => {
   const getStored = (key, fallback) => {
     try {
       const item = localStorage.getItem(key);
-      return item ? JSON.parse(item) : fallback;
+      if (!item) return fallback;
+      const parsed = JSON.parse(item);
+      // Sanitize legacy name if present
+      if (Array.isArray(parsed)) {
+        return parsed.map(a => a && a.name === 'Anirudh Bhagat' ? { ...a, name: 'Admin User' } : a);
+      }
+      if (parsed && parsed.name === 'Anirudh Bhagat') {
+        return { ...parsed, name: 'Admin User' };
+      }
+      return parsed;
     } catch (e) {
       return fallback;
     }
