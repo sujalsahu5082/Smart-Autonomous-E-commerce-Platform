@@ -9,36 +9,43 @@ const ProductCard = ({ product }) => {
   const discountPrice = Math.round(product.price - (product.price * product.discount) / 100);
   const isWish = isInWishlist(product.pid);
 
+  // Deterministic "rating" and "review" count from product id
+  const rating = ((product.pid % 15) * 0.1 + 3.5).toFixed(1);
+  const reviews = ((product.pid * 37 + 123) % 4500) + 200;
+  const isAssured = product.pid % 3 !== 0;
+
+  const savingsAmount = product.discount > 0
+    ? (product.price - discountPrice).toLocaleString()
+    : null;
+
   return (
     <div className="col">
       <div className="card h-100 cus-card position-relative">
 
-        {/* Wishlist Heart Button */}
+        {/* Discount Ribbon */}
+        {product.discount > 0 && (
+          <div className="discount-ribbon">
+            -{product.discount}% OFF
+          </div>
+        )}
+
+        {/* Wishlist Heart */}
         <button
           className={`wishlist-btn ${isWish ? 'text-danger' : 'text-muted'}`}
           onClick={() => toggleWishlist(product)}
           title={isWish ? 'Remove from wishlist' : 'Add to wishlist'}
         >
-          <i className={`fa-heart ${isWish ? 'fa-solid' : 'fa-regular'}`} style={{ fontSize: '0.95rem' }}></i>
+          <i
+            className={`fa-heart ${isWish ? 'fa-solid' : 'fa-regular'}`}
+            style={{ fontSize: '0.9rem' }}
+          ></i>
         </button>
-
-        {/* Discount ribbon */}
-        {product.discount > 0 && (
-          <div style={{
-            position: 'absolute', top: 12, left: 12, zIndex: 4,
-            background: 'linear-gradient(135deg, #ef4444, #dc2626)',
-            color: '#fff', fontSize: '0.7rem', fontWeight: 700,
-            padding: '3px 9px', borderRadius: '6px',
-            boxShadow: '0 2px 8px rgba(239,68,68,0.35)',
-          }}>
-            -{product.discount}%
-          </div>
-        )}
 
         {/* Product Image */}
         <div
           className="card-img-top-wrapper"
           onClick={() => navigate(`/product/${product.pid}`)}
+          style={{ cursor: 'pointer' }}
         >
           <img
             src={product.image ? `/Images/${product.image}` : '/Images/product.png'}
@@ -47,22 +54,39 @@ const ProductCard = ({ product }) => {
           />
         </div>
 
-        {/* Product Details */}
-        <div className="card-body d-flex flex-column p-3 pt-2">
-          <h6
-            className="fw-bold mb-1 text-truncate"
-            title={product.name}
-            style={{ cursor: 'pointer', fontSize: '0.92rem', color: '#0f172a' }}
+        {/* Card Body */}
+        <div className="card-body d-flex flex-column" style={{ padding: '12px' }}>
+
+          {/* Product Name */}
+          <div
+            className="product-title"
             onClick={() => navigate(`/product/${product.pid}`)}
+            title={product.name}
           >
             {product.name}
-          </h6>
-          <p className="text-truncate mb-3" style={{ fontSize: '0.8rem', color: '#64748b' }}>
-            {product.description}
-          </p>
+          </div>
 
-          {/* Price */}
-          <div className="d-flex align-items-center gap-2 mb-3 flex-wrap">
+          {/* Assured badge */}
+          {isAssured && (
+            <div className="mb-1">
+              <span className="assured-badge">
+                <i className="fa-solid fa-shield-check" style={{ fontSize: '0.65rem' }}></i>
+                Assured
+              </span>
+            </div>
+          )}
+
+          {/* Star Rating */}
+          <div className="star-rating mb-1">
+            <span className="stars">
+              {rating}
+              <i className="fa-solid fa-star" style={{ fontSize: '0.62rem' }}></i>
+            </span>
+            <span className="review-count">({reviews.toLocaleString()})</span>
+          </div>
+
+          {/* Price Section */}
+          <div className="d-flex align-items-baseline gap-2 flex-wrap mb-1">
             <span className="real-price">₹{discountPrice.toLocaleString()}</span>
             {product.discount > 0 && (
               <>
@@ -72,13 +96,28 @@ const ProductCard = ({ product }) => {
             )}
           </div>
 
+          {/* Savings */}
+          {savingsAmount && (
+            <div style={{ fontSize: '0.75rem', color: '#388E3C', fontWeight: 600, marginBottom: '8px' }}>
+              <i className="fa-solid fa-tag me-1"></i>
+              Save ₹{savingsAmount}
+            </div>
+          )}
+
+          {/* Free Delivery hint */}
+          <div style={{ fontSize: '0.72rem', color: '#565959', marginBottom: '10px' }}>
+            <i className="fa-solid fa-truck-fast me-1" style={{ color: '#028FC8' }}></i>
+            Free Delivery
+          </div>
+
           {/* Add to Cart */}
           <div className="mt-auto">
             <button
               className="btn-add-cart"
               onClick={() => addToCart(product)}
             >
-              <i className="fa-solid fa-bag-shopping me-2"></i>Add to Cart
+              <i className="fa-solid fa-cart-shopping me-2"></i>
+              Add to Cart
             </button>
           </div>
         </div>
