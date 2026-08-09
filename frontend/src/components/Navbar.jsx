@@ -50,11 +50,27 @@ const Navbar = ({ onOpenAddCategory, onOpenAddProduct, onToggleAiAssistant }) =>
         <div className="navbar-top-inner">
           {/* Logo */}
           <Link className="navbar-logo" to="/">
-            <div className="navbar-logo-text">
-              <i className="fa-solid fa-bolt logo-icon"></i>
-              Smart<span style={{ color: '#D99B26' }}>Shop</span>
+            <div className="navbar-logo-text" style={{ gap: '8px' }}>
+              <div
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 8,
+                  background: 'linear-gradient(135deg, #D99B26 0%, #E6A835 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#1B3B2B',
+                  boxShadow: '0 2px 6px rgba(217,155,38,0.4)',
+                }}
+              >
+                <i className="fa-solid fa-bag-shopping" style={{ fontSize: '0.95rem' }}></i>
+              </div>
+              <span style={{ fontWeight: 800, letterSpacing: '-0.4px' }}>
+                Smart<span style={{ color: '#D99B26', marginLeft: '3px' }}>E-Commerce</span>
+              </span>
             </div>
-            <span className="navbar-logo-sub">India's Trusted Store</span>
+            <span className="navbar-logo-sub">India's Premier Shopping Hub</span>
           </Link>
 
           {/* Deliver to — desktop only */}
