@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import AdminModals from './components/AdminModals';
+import AiAssistantWidget from './components/AiAssistantWidget';
 
 import Home from './pages/Home';
 import Products from './pages/Products';
@@ -32,12 +33,14 @@ import NotFound from './pages/NotFound';
 function App() {
   const [showAddCategory, setShowAddCategory] = useState(false);
   const [showAddProduct, setShowAddProduct] = useState(false);
+  const [showAiAssistant, setShowAiAssistant] = useState(false);
 
   return (
     <div className="d-flex flex-column min-vh-100">
       <Navbar
         onOpenAddCategory={() => setShowAddCategory(true)}
         onOpenAddProduct={() => setShowAddProduct(true)}
+        onToggleAiAssistant={() => setShowAiAssistant((prev) => !prev)}
       />
 
       <AdminModals
@@ -45,6 +48,11 @@ function App() {
         setShowAddCategory={setShowAddCategory}
         showAddProduct={showAddProduct}
         setShowAddProduct={setShowAddProduct}
+      />
+
+      <AiAssistantWidget
+        isOpen={showAiAssistant}
+        onToggle={() => setShowAiAssistant((prev) => !prev)}
       />
 
       <main className="flex-grow-1">
