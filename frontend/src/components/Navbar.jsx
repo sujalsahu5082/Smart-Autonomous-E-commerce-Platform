@@ -52,14 +52,14 @@ const Navbar = ({ onOpenAddCategory, onOpenAddProduct, onToggleAiAssistant }) =>
           <Link className="navbar-logo" to="/">
             <div className="navbar-logo-text">
               <i className="fa-solid fa-bolt logo-icon"></i>
-              Smart<span style={{ color: '#FF9F00' }}>Shop</span>
+              Smart<span style={{ color: '#D99B26' }}>Shop</span>
             </div>
             <span className="navbar-logo-sub">India's Trusted Store</span>
           </Link>
 
           {/* Deliver to — desktop only */}
           <div className="navbar-deliver d-none d-lg-flex">
-            <span><i className="fa-solid fa-location-dot me-1" style={{ color: '#FF9F00', fontSize: '0.9rem' }}></i>Deliver to</span>
+            <span><i className="fa-solid fa-location-dot me-1" style={{ color: '#D99B26', fontSize: '0.9rem' }}></i>Deliver to</span>
             <strong>India</strong>
           </div>
 
@@ -258,10 +258,10 @@ const Navbar = ({ onOpenAddCategory, onOpenAddProduct, onToggleAiAssistant }) =>
               onClick={onToggleAiAssistant}
               style={{
                 marginLeft: 'auto',
-                color: '#FF9F00',
+                color: '#D99B26',
                 fontWeight: 700,
-                background: 'rgba(255,159,0,0.12)',
-                border: '1px solid rgba(255,159,0,0.3)',
+                background: 'rgba(217,155,38,0.15)',
+                border: '1px solid rgba(217,155,38,0.4)',
                 borderRadius: '4px',
                 cursor: 'pointer',
               }}

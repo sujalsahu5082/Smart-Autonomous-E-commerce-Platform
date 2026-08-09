@@ -12,44 +12,44 @@
    CSS Custom Properties (Design Tokens)
    ---------------------------------------------------------- */
 :root {
-  /* Brand Colors — Amazon/Flipkart inspired */
-  --color-navbar:        #131921;
-  --color-navbar-mid:    #232f3e;
-  --color-navbar-hover:  #37475a;
-  --color-accent:        #FF9F00;
-  --color-accent-dark:   #e68900;
-  --color-accent-light:  #ffb733;
-  --color-blue:          #007185;
-  --color-blue-dark:     #005a6a;
-  --color-link:          #007185;
-  --color-primary:       #028FC8;
-  --color-primary-dark:  #01699a;
-  --color-success:       #067D62;
-  --color-danger:        #D93025;
-  --color-warning:       #FF9F00;
-  --color-flipkart:      #2874F0;
+  /* Brand Colors — Organic Green & Warm Beige Theme */
+  --color-navbar:        #1B3B2B;  /* Deep Forest Green */
+  --color-navbar-mid:    #244A37;  /* Rich Sage Green */
+  --color-navbar-hover:  #2E5B44;  /* Lighter Forest */
+  --color-accent:        #D99B26;  /* Warm Golden Amber */
+  --color-accent-dark:   #B87C17;  /* Deep Warm Honey */
+  --color-accent-light:  #E6A835;  /* Soft Warm Gold */
+  --color-blue:          #2D5A40;  /* Deep Sage */
+  --color-blue-dark:     #1E3A2B;  /* Evergreen */
+  --color-link:          #27523C;  /* Forest Green Link */
+  --color-primary:       #1E3A2B;  /* Main Forest Green */
+  --color-primary-dark:  #14291E;  /* Deep Forest */
+  --color-success:       #286644;  /* Emerald Green */
+  --color-danger:        #B94A48;  /* Muted Red */
+  --color-warning:       #D99B26;  /* Warm Gold */
+  --color-flipkart:      #2D5A40;  /* Earthy Sage */
 
-  /* Neutrals */
-  --color-bg:            #F1F3F6;
-  --color-surface:       #FFFFFF;
-  --color-surface-2:     #F9FAFB;
-  --color-border:        #E2E8F0;
-  --color-border-light:  #F0F0F0;
-  --color-text:          #0F1111;
-  --color-text-secondary:#565959;
-  --color-text-muted:    #878787;
-  --color-star:          #FF9900;
+  /* Beige Neutrals */
+  --color-bg:            #F7F4EB;  /* Warm Cream Beige Background */
+  --color-surface:       #FFFFFF;  /* Crisp Card Surface */
+  --color-surface-2:     #EFECE3;  /* Warm Sand Accent Surface */
+  --color-border:        #E5DED1;  /* Soft Beige Border */
+  --color-border-light:  #EFECE3;  /* Ultra Light Sand */
+  --color-text:          #1C2B22;  /* Deep Slate Forest Text */
+  --color-text-secondary:#526358;  /* Muted Sage Text */
+  --color-text-muted:    #7D8E83;  /* Soft Sage Gray */
+  --color-star:          #E6A835;  /* Golden Star Rating */
 
-  /* Gradients */
-  --grad-navbar:         linear-gradient(180deg, #232f3e 0%, #131921 100%);
-  --grad-accent:         linear-gradient(135deg, #FF9F00 0%, #FF6B35 100%);
-  --grad-blue:           linear-gradient(135deg, #028FC8 0%, #007185 100%);
-  --grad-flipkart:       linear-gradient(135deg, #2874F0 0%, #1a5dc7 100%);
-  --grad-success:        linear-gradient(135deg, #067D62 0%, #04614b 100%);
-  --grad-danger:         linear-gradient(135deg, #D93025 0%, #b71c1c 100%);
-  --grad-hero-overlay:   linear-gradient(90deg, rgba(19,25,33,0.85) 0%, rgba(19,25,33,0.3) 60%, transparent 100%);
-  --grad-footer:         linear-gradient(180deg, #232f3e 0%, #131921 100%);
-  --grad-section-accent: linear-gradient(90deg, #2874F0 0%, #028FC8 100%);
+  /* Organic Gradients */
+  --grad-navbar:         linear-gradient(180deg, #244A37 0%, #1B3B2B 100%);
+  --grad-accent:         linear-gradient(135deg, #D99B26 0%, #B87C17 100%);
+  --grad-blue:           linear-gradient(135deg, #2D5A40 0%, #1E3A2B 100%);
+  --grad-flipkart:       linear-gradient(135deg, #2D5A40 0%, #1B3B2B 100%);
+  --grad-success:        linear-gradient(135deg, #286644 0%, #1b472e 100%);
+  --grad-danger:         linear-gradient(135deg, #B94A48 0%, #8a2f2e 100%);
+  --grad-hero-overlay:   linear-gradient(90deg, rgba(27,59,43,0.92) 0%, rgba(27,59,43,0.4) 60%, transparent 100%);
+  --grad-footer:         linear-gradient(180deg, #244A37 0%, #14291E 100%);
+  --grad-section-accent: linear-gradient(90deg, #2D5A40 0%, #3B7A57 100%);
 
   /* Fonts */
   --font-main: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;

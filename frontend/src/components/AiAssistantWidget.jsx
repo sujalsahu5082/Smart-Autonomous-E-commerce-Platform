@@ -165,12 +165,12 @@ const AiAssistantWidget = ({ isOpen, onToggle }) => {
           bottom: 24,
           right: 24,
           zIndex: 1060,
-          background: 'linear-gradient(135deg, #131921 0%, #2874F0 100%)',
+          background: 'linear-gradient(135deg, #1E3A2B 0%, #2D5A40 100%)',
           color: '#fff',
-          border: '2px solid #FF9F00',
+          border: '2px solid #D99B26',
           borderRadius: '999px',
           padding: '12px 22px',
-          boxShadow: '0 8px 24px rgba(0,0,0,0.3)',
+          boxShadow: '0 8px 24px rgba(30,58,43,0.35)',
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
@@ -181,23 +181,23 @@ const AiAssistantWidget = ({ isOpen, onToggle }) => {
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.transform = 'translateY(-3px) scale(1.04)';
-          e.currentTarget.style.boxShadow = '0 12px 30px rgba(40,116,240,0.4)';
+          e.currentTarget.style.boxShadow = '0 12px 30px rgba(45,90,64,0.45)';
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.transform = 'translateY(0) scale(1)';
-          e.currentTarget.style.boxShadow = '0 8px 24px rgba(0,0,0,0.3)';
+          e.currentTarget.style.boxShadow = '0 8px 24px rgba(30,58,43,0.35)';
         }}
       >
         <span
           style={{
-            background: '#FF9F00',
+            background: '#D99B26',
             borderRadius: '50%',
             width: 28,
             height: 28,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: '#111',
+            color: '#1C2B22',
           }}
         >
           <i className="fa-solid fa-sparkles" style={{ fontSize: '0.85rem' }}></i>
@@ -205,8 +205,8 @@ const AiAssistantWidget = ({ isOpen, onToggle }) => {
         <span>Ask AI Assistant</span>
         <span
           style={{
-            background: '#FF9F00',
-            color: '#111',
+            background: '#D99B26',
+            color: '#1C2B22',
             fontSize: '0.62rem',
             fontWeight: 800,
             padding: '2px 7px',
@@ -237,7 +237,7 @@ const AiAssistantWidget = ({ isOpen, onToggle }) => {
         background: '#ffffff',
         borderRadius: 18,
         boxShadow: '0 20px 50px rgba(0,0,0,0.28)',
-        border: '1.5px solid rgba(40,116,240,0.35)',
+        border: '1.5px solid rgba(45,90,64,0.4)',
         display: 'flex',
         flexDirection: 'column',
         overflow: 'hidden',
@@ -248,13 +248,13 @@ const AiAssistantWidget = ({ isOpen, onToggle }) => {
       <div
         onMouseDown={handleMouseDown}
         style={{
-          background: 'linear-gradient(135deg, #131921 0%, #232f3e 60%, #2874F0 100%)',
+          background: 'linear-gradient(135deg, #1E3A2B 0%, #244A37 60%, #2D5A40 100%)',
           color: '#fff',
           padding: '12px 16px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          borderBottom: '2px solid #FF9F00',
+          borderBottom: '2px solid #D99B26',
           cursor: 'grab',
           userSelect: 'none',
         }}
@@ -266,11 +266,11 @@ const AiAssistantWidget = ({ isOpen, onToggle }) => {
               width: 34,
               height: 34,
               borderRadius: '50%',
-              background: 'linear-gradient(135deg, #FF9F00, #FF6B35)',
+              background: 'linear-gradient(135deg, #D99B26, #E6A835)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: '#111',
+              color: '#1C2B22',
             }}
           >
             <i className="fa-solid fa-robot" style={{ fontSize: '0.95rem' }}></i>
@@ -280,9 +280,9 @@ const AiAssistantWidget = ({ isOpen, onToggle }) => {
               Smart AI Assistant
               <span
                 style={{
-                  background: 'rgba(255,159,0,0.25)',
-                  color: '#FF9F00',
-                  border: '1px solid rgba(255,159,0,0.4)',
+                  background: 'rgba(217,155,38,0.25)',
+                  color: '#D99B26',
+                  border: '1px solid rgba(217,155,38,0.4)',
                   borderRadius: 4,
                   fontSize: '0.6rem',
                   padding: '1px 5px',
@@ -292,8 +292,8 @@ const AiAssistantWidget = ({ isOpen, onToggle }) => {
                 Llama 3.3
               </span>
             </div>
-            <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.65)' }}>
-              <i className="fa-solid fa-grip-dots-vertical me-1" style={{ color: '#FF9F00' }}></i>
+            <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.7)' }}>
+              <i className="fa-solid fa-grip-dots-vertical me-1" style={{ color: '#D99B26' }}></i>
               Drag to move • Powered by Groq
             </div>
           </div>
@@ -464,7 +464,7 @@ const AiAssistantWidget = ({ isOpen, onToggle }) => {
                 style={{
                   padding: '10px 14px',
                   borderRadius: m.sender === 'user' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
-                  background: m.sender === 'user' ? 'linear-gradient(135deg, #2874F0, #1a5dc7)' : '#ffffff',
+                  background: m.sender === 'user' ? 'linear-gradient(135deg, #1E3A2B, #2D5A40)' : '#ffffff',
                   color: m.sender === 'user' ? '#ffffff' : '#0F1111',
                   fontSize: '0.86rem',
                   lineHeight: 1.5,
@@ -731,8 +731,8 @@ const AiAssistantWidget = ({ isOpen, onToggle }) => {
             disabled={loading || !input.trim()}
             title="Send Message (Enter)"
             style={{
-              background: loading || !input.trim() ? '#CBD5E1' : '#FF9F00',
-              color: '#111',
+              background: loading || !input.trim() ? '#CBD5E1' : '#D99B26',
+              color: '#1C2B22',
               border: 'none',
               borderRadius: 10,
               width: 38,

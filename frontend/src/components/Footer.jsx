@@ -82,7 +82,7 @@ const Footer = () => {
                   border: '1px solid rgba(255,255,255,0.1)',
                 }}
               >
-                <i className="fa-solid fa-mobile-screen" style={{ color: '#FF9F00', fontSize: '1.4rem' }}></i>
+                <i className="fa-solid fa-mobile-screen" style={{ color: '#D99B26', fontSize: '1.4rem' }}></i>
                 <div>
                   <div style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.45)' }}>Download the app</div>
                   <div style={{ fontSize: '0.82rem', color: '#fff', fontWeight: 700 }}>Shop on the go</div>
@@ -95,7 +95,7 @@ const Footer = () => {
               <div className="footer-col-title">Shop</div>
               {quickLinks.map((l) => (
                 <Link key={l.to} to={l.to} className="footer-link">
-                  <i className="fa-solid fa-angle-right me-2" style={{ fontSize: '0.65rem', color: '#FF9F00' }}></i>
+                  <i className="fa-solid fa-angle-right me-2" style={{ fontSize: '0.65rem', color: '#D99B26' }}></i>
                   {l.label}
                 </Link>
               ))}
@@ -106,7 +106,7 @@ const Footer = () => {
               <div className="footer-col-title">Help</div>
               {helpLinks.map((l) => (
                 <Link key={l.to} to={l.to} className="footer-link">
-                  <i className="fa-solid fa-angle-right me-2" style={{ fontSize: '0.65rem', color: '#FF9F00' }}></i>
+                  <i className="fa-solid fa-angle-right me-2" style={{ fontSize: '0.65rem', color: '#D99B26' }}></i>
                   {l.label}
                 </Link>
               ))}

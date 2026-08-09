@@ -35,10 +35,10 @@ const Home = () => {
   const topRated = [...products].filter((p) => p.pid % 4 !== 0).slice(0, 4);
 
   const promoItems = [
-    { icon: 'fa-truck-fast',     title: 'Free Delivery',    sub: 'On orders above ₹499',         color: '#2874F0', bg: '#EEF3FF' },
-    { icon: 'fa-rotate-left',    title: 'Easy Returns',     sub: '7-day hassle-free returns',    color: '#067D62', bg: '#E9F5F0' },
-    { icon: 'fa-shield-halved',  title: 'Secure Payments',  sub: '100% encrypted checkout',      color: '#D93025', bg: '#FEF2F2' },
-    { icon: 'fa-headset',        title: '24/7 Support',     sub: 'Always here to help you',      color: '#FF9F00', bg: '#FFF8E1' },
+    { icon: 'fa-truck-fast',     title: 'Free Delivery',    sub: 'On orders above ₹499',         color: '#1E3A2B', bg: '#EFECE3' },
+    { icon: 'fa-rotate-left',    title: 'Easy Returns',     sub: '7-day hassle-free returns',    color: '#286644', bg: '#E3EFE9' },
+    { icon: 'fa-shield-halved',  title: 'Secure Payments',  sub: '100% encrypted checkout',      color: '#B94A48', bg: '#F9EBEA' },
+    { icon: 'fa-headset',        title: '24/7 Support',     sub: 'Always here to help you',      color: '#D99B26', bg: '#FAF3E3' },
   ];
 
   const tickerMessages = [
@@ -124,7 +124,7 @@ const Home = () => {
                         style={{
                           width: 28,
                           height: 2,
-                          background: '#FF9F00',
+                          background: '#D99B26',
                           display: 'inline-block',
                           borderRadius: 2,
                         }}
@@ -160,7 +160,7 @@ const Home = () => {
         <div className="deals-banner animate-fade-up animate-delay-1">
           <div>
             <div className="deals-banner-title">
-              <i className="fa-solid fa-fire" style={{ color: '#FF9F00' }}></i>
+              <i className="fa-solid fa-fire" style={{ color: '#D99B26' }}></i>
               Today's Deals — Ends In
             </div>
             <div className="deals-banner-subtitle">Grab these offers before they're gone!</div>
