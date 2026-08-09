@@ -80,7 +80,7 @@ const Cart = () => {
                         height: '72px',
                       }}>
                         <img
-                          src={item.product.image ? `/Images/${item.product.image}` : '/Images/product.png'}
+                          src={item.product.image ? (item.product.image.startsWith('http') ? item.product.image : `/Images/${item.product.image}`) : '/Images/product.png'}
                           alt={item.product.name}
                           style={{ maxHeight: '56px', objectFit: 'contain', maxWidth: '100%' }}
                           onError={(e) => { e.target.src = '/Images/product.png'; }}

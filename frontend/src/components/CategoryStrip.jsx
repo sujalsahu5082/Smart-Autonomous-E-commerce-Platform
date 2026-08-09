@@ -67,7 +67,7 @@ const CategoryStrip = () => {
           {categories.map((cat) => (
             <Link to={`/products?category=${cat.cid}`} key={cat.cid} className="category-item">
               <img
-                src={cat.image ? `/Images/${cat.image}` : '/Images/categories.png'}
+                src={cat.image ? (cat.image.startsWith('http') ? cat.image : `/Images/${cat.image}`) : '/Images/categories.png'}
                 alt={cat.name}
                 className="cat-img"
                 onError={(e) => { e.target.src = '/Images/categories.png'; }}

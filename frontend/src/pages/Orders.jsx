@@ -138,7 +138,7 @@ const Orders = () => {
                                   flexShrink: 0,
                                 }}>
                                   <img
-                                    src={it.product.image ? `/Images/${it.product.image}` : '/Images/product.png'}
+                                    src={it.product.image ? (it.product.image.startsWith('http') ? it.product.image : `/Images/${it.product.image}`) : '/Images/product.png'}
                                     alt={it.product.name}
                                     style={{ maxWidth: '40px', maxHeight: '40px', objectFit: 'contain' }}
                                     onError={(e) => { e.target.src = '/Images/product.png'; }}

@@ -48,7 +48,7 @@ const ProductCard = ({ product }) => {
           style={{ cursor: 'pointer' }}
         >
           <img
-            src={product.image ? `/Images/${product.image}` : '/Images/product.png'}
+            src={product.image ? (product.image.startsWith('http') ? product.image : `/Images/${product.image}`) : '/Images/product.png'}
             alt={product.name}
             onError={(e) => { e.target.src = '/Images/product.png'; }}
           />
