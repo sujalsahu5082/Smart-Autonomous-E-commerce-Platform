@@ -25,6 +25,8 @@ const mapOrderForAdmin = (o, users) => {
   return { ...mapOrder(o), userName: user ? user.name : 'Guest', userPhone: user ? user.phone : '-' };
 };
 
+const GUEST_CART_KEY = 'guest_cart';
+
 export const StoreProvider = ({ children }) => {
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
@@ -88,6 +90,23 @@ export const StoreProvider = ({ children }) => {
     }
   }, []);
 
+  // Sync guest cart to backend upon login
+  const syncGuestCart = async () => {
+    try {
+      const saved = localStorage.getItem(GUEST_CART_KEY);
+      if (!saved) return;
+      const guestItems = JSON.parse(saved);
+      for (const item of guestItems) {
+        if (item.product && item.product.pid) {
+          await api.post('/cart', { pid: item.product.pid, quantity: item.quantity });
+        }
+      }
+      localStorage.removeItem(GUEST_CART_KEY);
+    } catch (e) {
+      console.error('Failed to sync guest cart', e);
+    }
+  };
+
   // ---- initial load --------------------------------------------------------
 
   useEffect(() => {
@@ -98,6 +117,12 @@ export const StoreProvider = ({ children }) => {
         await loadAdminData();
       } else if (localStorage.getItem('ez_token')) {
         await loadUserData();
+      } else {
+        // Guest user: restore local cart
+        const saved = localStorage.getItem(GUEST_CART_KEY);
+        if (saved) {
+          try { setCart(JSON.parse(saved)); } catch (e) {}
+        }
       }
       setLoading(false);
     })();
@@ -111,9 +136,8 @@ export const StoreProvider = ({ children }) => {
       setAuth(res.access_token, 'user');
       setActiveUser(res.user);
       setActiveAdmin(null);
-      setCart([]);
-      setWishlist([]);
-      setOrders([]);
+      await syncGuestCart();
+      await loadUserData();
       return { success: true, user: res.user };
     } catch (e) {
       return { success: false, message: e.message };
@@ -126,6 +150,7 @@ export const StoreProvider = ({ children }) => {
       setAuth(res.access_token, 'user');
       setActiveUser(res.user);
       setActiveAdmin(null);
+      await syncGuestCart();
       await loadUserData();
       return { success: true, user: res.user };
     } catch (e) {
@@ -155,6 +180,7 @@ export const StoreProvider = ({ children }) => {
     setOrders([]);
     setUsers([]);
     setAdmins([]);
+    localStorage.removeItem(GUEST_CART_KEY);
   };
 
   const updateUserProfile = async (updatedData) => {
@@ -170,6 +196,7 @@ export const StoreProvider = ({ children }) => {
   // ---- Cart Operations -----------------------------------------------------
 
   const refreshCart = async () => {
+    if (!activeUser) return;
     try {
       const data = await api.get('/cart');
       setCart(data);
@@ -179,7 +206,22 @@ export const StoreProvider = ({ children }) => {
   };
 
   const addToCart = async (product, qty = 1) => {
-    if (!activeUser) return;
+    if (!activeUser) {
+      // Guest cart handling
+      setCart((prev) => {
+        const idx = prev.findIndex((i) => i.product && i.product.pid === product.pid);
+        let updated;
+        if (idx >= 0) {
+          updated = [...prev];
+          updated[idx] = { ...updated[idx], quantity: updated[idx].quantity + qty };
+        } else {
+          updated = [...prev, { id: Date.now(), product, quantity: qty }];
+        }
+        localStorage.setItem(GUEST_CART_KEY, JSON.stringify(updated));
+        return updated;
+      });
+      return;
+    }
     try {
       await api.post('/cart', { pid: product.pid, quantity: qty });
       await refreshCart();
@@ -193,6 +235,14 @@ export const StoreProvider = ({ children }) => {
       await removeFromCart(pid);
       return;
     }
+    if (!activeUser) {
+      setCart((prev) => {
+        const updated = prev.map((i) => (i.product.pid === pid ? { ...i, quantity } : i));
+        localStorage.setItem(GUEST_CART_KEY, JSON.stringify(updated));
+        return updated;
+      });
+      return;
+    }
     const item = cart.find((i) => i.product && i.product.pid === pid);
     if (!item) return;
     try {
@@ -204,6 +254,14 @@ export const StoreProvider = ({ children }) => {
   };
 
   const removeFromCart = async (pid) => {
+    if (!activeUser) {
+      setCart((prev) => {
+        const updated = prev.filter((i) => i.product && i.product.pid !== pid);
+        localStorage.setItem(GUEST_CART_KEY, JSON.stringify(updated));
+        return updated;
+      });
+      return;
+    }
     const item = cart.find((i) => i.product && i.product.pid === pid);
     if (!item) return;
     try {
@@ -214,11 +272,15 @@ export const StoreProvider = ({ children }) => {
     }
   };
 
-  const clearCart = () => setCart([]);
+  const clearCart = () => {
+    setCart([]);
+    localStorage.removeItem(GUEST_CART_KEY);
+  };
 
   // ---- Wishlist Operations -------------------------------------------------
 
   const refreshWishlist = async () => {
+    if (!activeUser) return;
     try {
       const data = await api.get('/wishlist');
       setWishlist(data.map((w) => w.product).filter(Boolean));
@@ -229,6 +291,14 @@ export const StoreProvider = ({ children }) => {
 
   const toggleWishlist = async (product) => {
     const exists = wishlist.some((p) => p.pid === product.pid);
+    if (!activeUser) {
+      if (exists) {
+        setWishlist((prev) => prev.filter((p) => p.pid !== product.pid));
+      } else {
+        setWishlist((prev) => [...prev, product]);
+      }
+      return;
+    }
     try {
       if (exists) {
         await api.delete(`/wishlist/${product.pid}`);
@@ -316,15 +386,28 @@ export const StoreProvider = ({ children }) => {
         userPhone: activeUser ? activeUser.phone : orderData.phone
       };
       setOrders([mapped, ...orders]);
-      setCart([]);
+      clearCart();
       return mapped;
     } catch (e) {
       throw new Error(e.message);
     }
   };
 
+  const cancelOrder = async (orderId) => {
+    const order = orders.find((o) => o.id === orderId || o.orderId === orderId);
+    if (!order) return;
+    try {
+      const data = await api.post(`/orders/${order.id}/cancel`);
+      const mapped = mapOrder(data);
+      setOrders(orders.map((o) => (o.id === data.id ? mapped : o)));
+      return { success: true };
+    } catch (e) {
+      return { success: false, message: e.message };
+    }
+  };
+
   const updateOrderStatus = async (orderId, status) => {
-    const order = orders.find((o) => o.orderId === orderId);
+    const order = orders.find((o) => o.orderId === orderId || o.id === orderId);
     if (!order) return;
     try {
       const data = await api.put(`/orders/${order.id}`, { status });
@@ -363,6 +446,25 @@ export const StoreProvider = ({ children }) => {
     }
   };
 
+  // ---- Reviews -------------------------------------------------------------
+
+  const fetchReviews = async (pid) => {
+    try {
+      return await api.get(`/products/${pid}/reviews`);
+    } catch (e) {
+      return [];
+    }
+  };
+
+  const postReview = async (pid, reviewData) => {
+    try {
+      const created = await api.post(`/products/${pid}/reviews`, reviewData);
+      return { success: true, review: created };
+    } catch (e) {
+      return { success: false, message: e.message };
+    }
+  };
+
   return (
     <StoreContext.Provider value={{
       categories, products, users, admins, activeUser, activeAdmin, cart, wishlist, orders, loading,
@@ -371,8 +473,9 @@ export const StoreProvider = ({ children }) => {
       toggleWishlist, isInWishlist,
       addCategory, updateCategory, deleteCategory,
       addProduct, updateProduct, deleteProduct,
-      placeOrder, updateOrderStatus,
-      deleteUser, addAdmin, deleteAdmin
+      placeOrder, cancelOrder, updateOrderStatus,
+      deleteUser, addAdmin, deleteAdmin,
+      fetchReviews, postReview
     }}>
       {children}
     </StoreContext.Provider>
