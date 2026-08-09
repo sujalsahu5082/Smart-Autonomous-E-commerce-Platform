@@ -46,9 +46,22 @@ const Footer = () => {
 
             {/* Brand Column */}
             <div className="col-md-4 col-lg-3">
-              <div className="footer-logo-text">
-                <i className="fa-solid fa-bolt logo-accent"></i>
-                Smart<span className="logo-accent">Shop</span>
+              <div className="footer-logo-text d-flex align-items-center gap-2">
+                <div
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: 8,
+                    background: 'linear-gradient(135deg, #D99B26 0%, #E6A835 100%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: '#1B3B2B',
+                  }}
+                >
+                  <i className="fa-solid fa-bag-shopping" style={{ fontSize: '0.9rem' }}></i>
+                </div>
+                <span>Smart<span className="logo-accent">E-Commerce</span></span>
               </div>
               <p className="footer-desc">
                 Your one-stop destination for electronics, fashion, home appliances, and unbeatable online deals — delivered fast across India.
