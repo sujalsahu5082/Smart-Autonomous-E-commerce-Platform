@@ -18,6 +18,7 @@ def build_discovery_crew(
     products: list[dict],
     user_context: dict | None = None,
     reviews: list[dict] | None = None,
+    coupons: list[dict] | None = None,
 ) -> Any:
     """Build the CrewAI crew for conversational product discovery.
 
@@ -32,6 +33,7 @@ def build_discovery_crew(
     catalog = _json(products)
     customer = _json(user_context or {"orders": [], "wishlist": []})
     review_data = _json(reviews or [])
+    coupon_data = _json(coupons or [])
 
     search_agent = Agent(
         role="Product Search Specialist",
@@ -70,9 +72,9 @@ def build_discovery_crew(
         role="Coupon Specialist",
         goal="Suggest applicable coupon offers or promotional deals for the customer's basket",
         backstory=(
-            "You are a promotions expert. You suggest relevant demo coupon codes such as "
-            "SAVE10 (10% off), FLAT50 (flat 50 off above 1500) or WELCOME15 for new customers, "
-            "and state any assumptions clearly."
+            "You are a promotions expert. You only recommend coupons that are actually "
+            "listed in the active coupons data. If none are available, say that no "
+            "applicable coupon exists instead of inventing codes."
         ),
         llm=llm,
         allow_delegation=False,
@@ -134,10 +136,13 @@ def build_discovery_crew(
     )
     coupon_task = Task(
         description=(
-            f"Suggest demo coupon codes applicable to this catalog:\n{catalog}\n\n"
-            "List each code with its assumed condition."
+            f"Active coupons in the system:\n{coupon_data}\n\n"
+            f"Catalog:\n{catalog}\n\n"
+            "List the coupons that apply to products in this catalog, with each code, "
+            "its discount, and what it applies to. If the list is empty, say no "
+            "applicable coupon exists right now. Do not invent coupon codes."
         ),
-        expected_output="A short list of demo coupon codes with conditions.",
+        expected_output="A short list of real applicable coupon codes with their conditions.",
         agent=coupon_agent,
     )
     review_task = Task(

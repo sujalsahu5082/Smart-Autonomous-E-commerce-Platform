@@ -61,5 +61,8 @@ async def discovery_chat(
     products = await retrieve_products(db, payload.message, top_k=10)
     context = await _user_context(db, current_user) if current_user else None
     reviews = await _reviews_for(db, products)
-    answer, mode = await run_discovery(payload.message, products, context, reviews)
+    from app.services.coupons import get_applicable_coupons
+
+    coupons = await get_applicable_coupons(db, [p["cid"] for p in products])
+    answer, mode = await run_discovery(payload.message, products, context, reviews, coupons)
     return ChatResponse(answer=answer, products=products, mode=mode)

@@ -8,8 +8,9 @@ from ai.rag import retriever
 from app.api.deps import DbSession, get_current_admin
 from app.api.serializers import product_to_out
 from app.core.security import hash_password
-from app.models import Admin, Category, Order, Product, User
+from app.models import Admin, Category, Coupon, Order, Product, User
 from app.schemas.admin import AdminCreate, AdminOut
+from app.schemas.coupon import CouponCreate, CouponOut
 from app.schemas.user import UserOut
 
 router = APIRouter(prefix="/admin", tags=["admin"])
@@ -100,4 +101,35 @@ async def delete_admin(
     if admin is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Admin not found")
     await db.delete(admin)
+    await db.commit()
+
+
+@router.get("/coupons", response_model=list[CouponOut])
+async def list_coupons(db: DbSession, current_admin: Annotated[Admin, Depends(get_current_admin)]):
+    result = await db.execute(select(Coupon).order_by(Coupon.id))
+    return result.scalars().all()
+
+
+@router.post("/coupons", response_model=CouponOut, status_code=status.HTTP_201_CREATED)
+async def create_coupon(
+    payload: CouponCreate, db: DbSession, current_admin: Annotated[Admin, Depends(get_current_admin)]
+):
+    existing = await db.execute(select(Coupon).where(Coupon.code == payload.code))
+    if existing.scalar_one_or_none():
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Coupon code already exists")
+    coupon = Coupon(**payload.model_dump())
+    db.add(coupon)
+    await db.commit()
+    await db.refresh(coupon)
+    return coupon
+
+
+@router.delete("/coupons/{coupon_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_coupon(
+    coupon_id: int, db: DbSession, current_admin: Annotated[Admin, Depends(get_current_admin)]
+):
+    coupon = await db.get(Coupon, coupon_id)
+    if coupon is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Coupon not found")
+    await db.delete(coupon)
     await db.commit()

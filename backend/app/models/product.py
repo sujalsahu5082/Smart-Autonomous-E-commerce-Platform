@@ -1,4 +1,6 @@
-from sqlalchemy import Float, ForeignKey, Integer, String
+from typing import Any
+
+from sqlalchemy import JSON, Float, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -14,6 +16,7 @@ class Product(Base):
     quantity: Mapped[int] = mapped_column(Integer, default=0)
     discount: Mapped[int] = mapped_column(Integer, default=0)
     image: Mapped[str] = mapped_column(String(255), default="product.png")
+    tags: Mapped[list[Any]] = mapped_column(JSON, default=list)
     cid: Mapped[int] = mapped_column(ForeignKey("category.cid"), index=True)
 
     category: Mapped["Category"] = relationship(back_populates="products")  # noqa: F821
