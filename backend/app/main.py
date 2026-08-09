@@ -8,6 +8,7 @@ from app.api.auth import router as auth_router
 from app.api.cart import router as cart_router
 from app.api.categories import router as categories_router
 from app.api.discovery import router as discovery_router
+from app.api.llm import router as llm_router
 from app.api.orders import router as orders_router
 from app.api.products import router as products_router
 from app.api.reviews import router as reviews_router
@@ -43,6 +44,7 @@ app.include_router(orders_router, prefix=settings.api_prefix)
 app.include_router(reviews_router, prefix=settings.api_prefix)
 app.include_router(search_router, prefix=settings.api_prefix)
 app.include_router(discovery_router, prefix=settings.api_prefix)
+app.include_router(llm_router, prefix=settings.api_prefix)
 app.include_router(admin_router, prefix=settings.api_prefix)
 
 
