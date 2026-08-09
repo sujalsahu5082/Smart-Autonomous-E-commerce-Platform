@@ -6,13 +6,20 @@ from app.core.config import settings
 def get_llm():
     """CrewAI-compatible LLM backed by Groq (Llama 3.3).
 
-    Raises if GROQ_API_KEY is not configured; callers must degrade gracefully.
+    Uses CrewAI's native openai provider pointed at Groq's OpenAI-compatible
+    endpoint (avoids the litellm dependency). Raises if GROQ_API_KEY is not
+    configured; callers must degrade gracefully.
     """
     if not settings.groq_api_key:
         raise RuntimeError("GROQ_API_KEY not configured")
     from crewai import LLM
 
-    return LLM(model=f"groq/{settings.groq_model}", api_key=settings.groq_api_key, temperature=0.3)
+    return LLM(
+        model=f"openai/{settings.groq_model}",
+        api_key=settings.groq_api_key,
+        base_url="https://api.groq.com/openai/v1",
+        temperature=0.3,
+    )
 
 
 def call_llm(
