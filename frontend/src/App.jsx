@@ -34,7 +34,7 @@ function App() {
   const [showAddProduct, setShowAddProduct] = useState(false);
 
   return (
-    <div class="d-flex flex-column min-vh-100">
+    <div className="d-flex flex-column min-vh-100">
       <Navbar
         onOpenAddCategory={() => setShowAddCategory(true)}
         onOpenAddProduct={() => setShowAddProduct(true)}
@@ -47,7 +47,7 @@ function App() {
         setShowAddProduct={setShowAddProduct}
       />
 
-      <main class="flex-grow-1">
+      <main className="flex-grow-1">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/products" element={<Products />} />

@@ -1,27 +1,80 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import CategoryStrip from '../components/CategoryStrip';
 import ProductCard from '../components/ProductCard';
 import { useStore } from '../context/StoreContext';
 
+/* ── Countdown hook ── */
+function useCountdown(targetHours = 10) {
+  const [time, setTime] = useState({ h: targetHours, m: 0, s: 0 });
+  useEffect(() => {
+    const total = targetHours * 3600;
+    let remaining = total;
+    const id = setInterval(() => {
+      remaining = Math.max(0, remaining - 1);
+      setTime({
+        h: Math.floor(remaining / 3600),
+        m: Math.floor((remaining % 3600) / 60),
+        s: remaining % 60,
+      });
+      if (remaining === 0) clearInterval(id);
+    }, 1000);
+    return () => clearInterval(id);
+  }, []);
+  return time;
+}
+
+const pad = (n) => String(n).padStart(2, '0');
+
 const Home = () => {
   const { products } = useStore();
+  const countdown = useCountdown(8);
 
   const latestProducts = [...products].slice(0, 8);
   const hotDeals = [...products].sort((a, b) => b.discount - a.discount).slice(0, 8);
+  const topRated = [...products].filter((p) => p.pid % 4 !== 0).slice(0, 4);
+
+  const promoItems = [
+    { icon: 'fa-truck-fast',     title: 'Free Delivery',    sub: 'On orders above ₹499',         color: '#2874F0', bg: '#EEF3FF' },
+    { icon: 'fa-rotate-left',    title: 'Easy Returns',     sub: '7-day hassle-free returns',    color: '#067D62', bg: '#E9F5F0' },
+    { icon: 'fa-shield-halved',  title: 'Secure Payments',  sub: '100% encrypted checkout',      color: '#D93025', bg: '#FEF2F2' },
+    { icon: 'fa-headset',        title: '24/7 Support',     sub: 'Always here to help you',      color: '#FF9F00', bg: '#FFF8E1' },
+  ];
+
+  const tickerMessages = [
+    '🔥 Mega Sale: Up to 80% OFF on Electronics',
+    '🚚 Free Delivery on Orders Above ₹499',
+    '✨ New Arrivals Added Daily',
+    '🛡️ 100% Secure Payment Gateway',
+    '↩️ Easy 7-Day Return Policy',
+    '🎁 Buy 2 Get 1 Free on selected items',
+    '⭐ 5-Star Rated Service by 10L+ Customers',
+  ];
 
   return (
     <div>
-      {/* Category Strip */}
+      {/* ── Deal Ticker ── */}
+      <div className="deal-ticker">
+        <div className="ticker-track">
+          {[...tickerMessages, ...tickerMessages].map((msg, i) => (
+            <span key={i} className="ticker-item">
+              <span className="ticker-dot"></span>
+              {msg}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Category Strip ── */}
       <CategoryStrip />
 
-      {/* Hero Carousel */}
-      <div className="container mt-4">
+      {/* ── Hero Carousel ── */}
+      <div className="hero-carousel-wrapper">
         <div
           id="heroCarousel"
           className="carousel slide"
           data-bs-ride="carousel"
-          data-bs-interval="4000"
+          data-bs-interval="4500"
         >
           <div className="carousel-indicators">
             {[0, 1, 2].map((i) => (
@@ -31,24 +84,67 @@ const Home = () => {
                 data-bs-target="#heroCarousel"
                 data-bs-slide-to={i}
                 className={i === 0 ? 'active' : ''}
-                style={{
-                  width: '8px', height: '8px', borderRadius: '50%',
-                  background: i === 0 ? '#6366f1' : 'rgba(255,255,255,0.5)',
-                  border: 'none',
-                }}
+                aria-label={`Slide ${i + 1}`}
               ></button>
             ))}
           </div>
           <div className="carousel-inner">
-            <div className="carousel-item active">
-              <img src="/Images/scroll_img2.png" className="d-block w-100" alt="Special Deals" style={{ maxHeight: '380px', objectFit: 'cover' }} />
-            </div>
-            <div className="carousel-item">
-              <img src="/Images/scroll_img1.png" className="d-block w-100" alt="Electronics Sale" style={{ maxHeight: '380px', objectFit: 'cover' }} />
-            </div>
-            <div className="carousel-item">
-              <img src="/Images/scroll_img3.png" className="d-block w-100" alt="Fashion Trends" style={{ maxHeight: '380px', objectFit: 'cover' }} />
-            </div>
+            {[
+              {
+                img: '/Images/scroll_img2.png',
+                eyebrow: '🔥 Limited Time Offer',
+                title: 'Mega Electronics\nSale — Up to 70% Off',
+                sub: 'Shop the latest gadgets at unbeatable prices',
+                cta: 'Shop Now',
+                ctaLink: '/products',
+              },
+              {
+                img: '/Images/scroll_img1.png',
+                eyebrow: '✨ New Collection',
+                title: 'Fashion Trends\nArrived This Season',
+                sub: 'Discover thousands of styles curated just for you',
+                cta: 'Explore Fashion',
+                ctaLink: '/products',
+              },
+              {
+                img: '/Images/scroll_img3.png',
+                eyebrow: '🏠 Home & Living',
+                title: 'Transform Your\nHome Today',
+                sub: 'Premium appliances and décor at amazing prices',
+                cta: 'Browse Products',
+                ctaLink: '/products',
+              },
+            ].map((slide, idx) => (
+              <div key={idx} className={`carousel-item ${idx === 0 ? 'active' : ''} hero-slide`}>
+                <img src={slide.img} alt={slide.title} className="d-block w-100" />
+                <div className="hero-slide-overlay">
+                  <div className="hero-slide-content animate-fade-up">
+                    <div className="hero-slide-eyebrow">
+                      <span
+                        style={{
+                          width: 28,
+                          height: 2,
+                          background: '#FF9F00',
+                          display: 'inline-block',
+                          borderRadius: 2,
+                        }}
+                      ></span>
+                      {slide.eyebrow}
+                    </div>
+                    <div className="hero-slide-title">
+                      {slide.title.split('\n').map((line, i) => (
+                        <span key={i}>{line}<br /></span>
+                      ))}
+                    </div>
+                    <p className="hero-slide-sub">{slide.sub}</p>
+                    <Link to={slide.ctaLink} className="hero-cta-primary">
+                      {slide.cta}
+                      <i className="fa-solid fa-arrow-right"></i>
+                    </Link>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
           <button className="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
             <span className="carousel-control-prev-icon"></span>
@@ -59,46 +155,49 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Latest Arrivals */}
-      <div className="container py-5">
-        <div className="section-header">
-          <h2 className="section-title">
-            <i className="fa-solid fa-sparkles" style={{ color: '#f59e0b', fontSize: '1.1rem' }}></i>
-            Latest Arrivals
-          </h2>
-          <Link to="/products" className="btn btn-outline-primary btn-sm fw-semibold px-3">
-            View All <i className="fa-solid fa-arrow-right ms-1"></i>
+      {/* ── Today's Deals Countdown Banner ── */}
+      <div className="container mt-4">
+        <div className="deals-banner animate-fade-up animate-delay-1">
+          <div>
+            <div className="deals-banner-title">
+              <i className="fa-solid fa-fire" style={{ color: '#FF9F00' }}></i>
+              Today's Deals — Ends In
+            </div>
+            <div className="deals-banner-subtitle">Grab these offers before they're gone!</div>
+          </div>
+          <div className="deals-countdown">
+            {[
+              { num: pad(countdown.h), label: 'Hours' },
+              { num: pad(countdown.m), label: 'Mins' },
+              { num: pad(countdown.s), label: 'Secs' },
+            ].map((item, i) => (
+              <React.Fragment key={i}>
+                {i > 0 && <span className="countdown-sep">:</span>}
+                <div className="countdown-block">
+                  <span className="countdown-num">{item.num}</span>
+                  <span className="countdown-label">{item.label}</span>
+                </div>
+              </React.Fragment>
+            ))}
+          </div>
+          <Link to="/products" className="hero-cta-primary d-none d-md-inline-flex">
+            View All Deals <i className="fa-solid fa-arrow-right"></i>
           </Link>
-        </div>
-        <div className="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
-          {latestProducts.map((prod) => (
-            <ProductCard key={prod.pid} product={prod} />
-          ))}
         </div>
       </div>
 
-      {/* Promo Banner Strip */}
-      <div className="container mb-4">
+      {/* ── Promo Strip ── */}
+      <div className="container mt-4">
         <div className="row g-3">
-          {[
-            { icon: 'fa-truck-fast', title: 'Free Delivery', sub: 'On orders above ₹499', color: '#4f46e5', bg: '#eef2ff' },
-            { icon: 'fa-rotate-left', title: 'Easy Returns', sub: '7-day hassle-free returns', color: '#059669', bg: '#f0fdf4' },
-            { icon: 'fa-shield-halved', title: 'Secure Payments', sub: '100% encrypted checkout', color: '#e11d48', bg: '#fff1f2' },
-            { icon: 'fa-headset', title: '24/7 Support', sub: 'We are always here to help', color: '#d97706', bg: '#fffbeb' },
-          ].map((b, i) => (
-            <div key={i} className="col-6 col-md-3">
-              <div className="d-flex align-items-center gap-3 p-3 rounded-3" style={{ background: b.bg, border: `1px solid ${b.color}22` }}>
-                <div style={{
-                  width: 44, height: 44, borderRadius: '12px',
-                  background: `${b.color}18`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  flexShrink: 0,
-                }}>
-                  <i className={`fa-solid ${b.icon}`} style={{ color: b.color, fontSize: '1.1rem' }}></i>
+          {promoItems.map((b, i) => (
+            <div key={i} className="col-6 col-md-3 animate-fade-up" style={{ animationDelay: `${i * 0.08}s` }}>
+              <div className="promo-strip-card">
+                <div className="promo-icon-box" style={{ background: b.bg }}>
+                  <i className={`fa-solid ${b.icon}`} style={{ color: b.color }}></i>
                 </div>
                 <div>
-                  <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#0f172a' }}>{b.title}</div>
-                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>{b.sub}</div>
+                  <div className="promo-strip-title">{b.title}</div>
+                  <div className="promo-strip-sub">{b.sub}</div>
                 </div>
               </div>
             </div>
@@ -106,20 +205,144 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Hot Deals */}
-      <div className="container py-4 pb-5">
+      {/* ── Latest Arrivals ── */}
+      <div className="container py-5">
         <div className="section-header">
           <h2 className="section-title">
-            <i className="fa-solid fa-fire" style={{ color: '#ef4444', fontSize: '1.1rem' }}></i>
-            Hot Deals
+            <i className="fa-solid fa-sparkles" style={{ color: '#FF9F00', fontSize: '1rem' }}></i>
+            Latest Arrivals
           </h2>
-          <Link to="/products" className="btn btn-outline-primary btn-sm fw-semibold px-3">
-            Browse All <i className="fa-solid fa-arrow-right ms-1"></i>
+          <Link to="/products" className="section-view-all">
+            View All <i className="fa-solid fa-arrow-right fa-xs"></i>
           </Link>
         </div>
-        <div className="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-4">
-          {hotDeals.map((prod) => (
+        <div className="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-3">
+          {latestProducts.map((prod) => (
             <ProductCard key={prod.pid} product={prod} />
+          ))}
+        </div>
+      </div>
+
+      {/* ── Category Spotlight Banner ── */}
+      <div className="container mb-5">
+        <div
+          style={{
+            borderRadius: 12,
+            overflow: 'hidden',
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: 16,
+          }}
+        >
+          {[
+            {
+              icon: 'fa-mobile-screen',
+              label: 'Electronics',
+              sub: 'Gadgets & Tech',
+              gradient: 'linear-gradient(135deg, #131921 0%, #1a3a5c 100%)',
+              accent: '#028FC8',
+            },
+            {
+              icon: 'fa-shirt',
+              label: 'Fashion',
+              sub: 'Trending Styles',
+              gradient: 'linear-gradient(135deg, #2D1B69 0%, #8B2FC9 100%)',
+              accent: '#FF9F00',
+            },
+          ].map((s, i) => (
+            <Link
+              key={i}
+              to="/products"
+              style={{
+                background: s.gradient,
+                borderRadius: 12,
+                padding: '24px 28px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 18,
+                textDecoration: 'none',
+                transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
+                position: 'relative',
+                overflow: 'hidden',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.22)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 4px 16px rgba(0,0,0,0.15)'; }}
+            >
+              <div
+                style={{
+                  width: 56,
+                  height: 56,
+                  borderRadius: 14,
+                  background: `${s.accent}25`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                  border: `1.5px solid ${s.accent}45`,
+                }}
+              >
+                <i className={`fa-solid ${s.icon}`} style={{ color: s.accent, fontSize: '1.5rem' }}></i>
+              </div>
+              <div>
+                <div style={{ color: '#fff', fontWeight: 800, fontSize: '1.1rem', lineHeight: 1.2 }}>{s.label}</div>
+                <div style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.8rem', marginTop: 2 }}>{s.sub}</div>
+                <div style={{ color: s.accent, fontSize: '0.78rem', fontWeight: 700, marginTop: 8, display: 'flex', alignItems: 'center', gap: 5 }}>
+                  Shop Now <i className="fa-solid fa-arrow-right fa-xs"></i>
+                </div>
+              </div>
+              {/* decorative circle */}
+              <div
+                style={{
+                  position: 'absolute',
+                  right: -20,
+                  top: -20,
+                  width: 110,
+                  height: 110,
+                  borderRadius: '50%',
+                  background: `${s.accent}12`,
+                  pointerEvents: 'none',
+                }}
+              ></div>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Hot Deals ── */}
+      <div style={{ background: '#fff', borderTop: '4px solid #2874F0', paddingBottom: '48px' }}>
+        <div className="container py-5">
+          <div className="section-header">
+            <h2 className="section-title">
+              <i className="fa-solid fa-fire" style={{ color: '#D93025', fontSize: '1rem' }}></i>
+              Hot Deals
+            </h2>
+            <Link to="/products" className="section-view-all">
+              Browse All <i className="fa-solid fa-arrow-right fa-xs"></i>
+            </Link>
+          </div>
+          <div className="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-3">
+            {hotDeals.map((prod) => (
+              <ProductCard key={prod.pid} product={prod} />
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* ── Trust Strip ── */}
+      <div className="container my-5">
+        <div className="trust-strip">
+          {[
+            { icon: 'fa-shield-halved', label: '2 Crore+ Happy Customers', color: '#2874F0' },
+            { icon: 'fa-truck-fast',    label: 'Express Delivery Available', color: '#067D62' },
+            { icon: 'fa-lock',          label: 'SSL Encrypted Checkout',     color: '#D93025' },
+            { icon: 'fa-star',          label: '4.8/5 Rated on App Stores',  color: '#FF9F00' },
+            { icon: 'fa-headset',       label: '24/7 Customer Support',       color: '#8B2FC9' },
+          ].map((t, i) => (
+            <div key={i} className="trust-item">
+              <i className={`fa-solid ${t.icon}`} style={{ color: t.color }}></i>
+              {t.label}
+            </div>
           ))}
         </div>
       </div>
