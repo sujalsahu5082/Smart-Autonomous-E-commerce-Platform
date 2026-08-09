@@ -38,6 +38,15 @@ class ProductRetriever:
 
     # ---- products -----------------------------------------------------------
 
+    @staticmethod
+    def _scalar_metadata(data: dict[str, Any]) -> dict[str, Any]:
+        """ChromaDB metadata values must be scalars; flatten lists to strings."""
+        return {
+            k: (", ".join(str(v) for v in value) if isinstance(value, list) else value)
+            for k, value in data.items()
+            if value is not None
+        }
+
     def upsert_products(self, products: list[dict[str, Any]]) -> None:
         if not products:
             return
@@ -45,9 +54,7 @@ class ProductRetriever:
         self._collection.upsert(
             ids=[str(p["pid"]) for p in products],
             documents=[f"{p['name']}\n{p.get('description', '')}" for p in products],
-            metadatas=[
-                {k: v for k, v in p.items() if v is not None and k != "description"} for p in products
-            ],
+            metadatas=[self._scalar_metadata({k: v for k, v in p.items() if k != "description"}) for p in products],
         )
 
     def delete_product(self, pid: int) -> None:
@@ -70,9 +77,7 @@ class ProductRetriever:
         self._reviews_collection.upsert(
             ids=[str(r["id"]) for r in reviews],
             documents=[f"Rating: {r.get('rating', 0)}/5. {r.get('comment') or ''}" for r in reviews],
-            metadatas=[
-                {k: v for k, v in r.items() if v is not None and k not in ("comment", "text")} for r in reviews
-            ],
+            metadatas=[self._scalar_metadata({k: v for k, v in r.items() if k not in ("comment", "text")}) for r in reviews],
         )
 
     def delete_reviews_for_product(self, product_id: int) -> None:

@@ -8,6 +8,7 @@ class ProductCreate(BaseModel):
     quantity: int = Field(default=0, ge=0)
     discount: int = Field(default=0, ge=0, le=100)
     image: str = "product.png"
+    tags: list[str] = Field(default_factory=list)
     cid: int
 
 
@@ -18,6 +19,7 @@ class ProductUpdate(BaseModel):
     quantity: int | None = Field(default=None, ge=0)
     discount: int | None = Field(default=None, ge=0, le=100)
     image: str | None = None
+    tags: list[str] | None = None
     cid: int | None = None
 
 
@@ -31,6 +33,7 @@ class ProductOut(BaseModel):
     quantity: int
     discount: int
     image: str
+    tags: list[str] = Field(default_factory=list)
     cid: int
     category_name: str | None = None
     price_after_discount: int
