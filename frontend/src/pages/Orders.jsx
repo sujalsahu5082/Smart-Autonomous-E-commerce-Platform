@@ -11,7 +11,7 @@ const statusConfig = {
 };
 
 const Orders = () => {
-  const { orders, activeUser } = useStore();
+  const { orders, activeUser, cancelOrder } = useStore();
   const { state } = window.history;
   const recentOrderId = state?.usr?.orderId ?? null;
 
@@ -195,6 +195,14 @@ const Orders = () => {
                             ₹{ord.totalAmount.toLocaleString()}
                           </span>
                         </div>
+                        {['Order Placed', 'Pending', 'Processing'].includes(ord.status) && (
+                          <button
+                            className="btn btn-outline-danger btn-sm w-100 mt-3 fw-semibold"
+                            onClick={() => cancelOrder(ord.id)}
+                          >
+                            <i className="fa-solid fa-ban me-1"></i>Cancel Order
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
