@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useStore } from '../context/StoreContext';
 
-const Navbar = ({ onOpenAddCategory, onOpenAddProduct }) => {
+const Navbar = ({ onOpenAddCategory, onOpenAddProduct, onToggleAiAssistant }) => {
   const { activeUser, activeAdmin, cart, categories, logout } = useStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -253,9 +253,21 @@ const Navbar = ({ onOpenAddCategory, onOpenAddProduct }) => {
                 <Link className="nav-cat-link d-lg-none" to="/wishlist">Wishlist</Link>
               </>
             )}
-            <Link className="nav-cat-link" to="/cart" style={{ marginLeft: 'auto', color: '#FF9F00', fontWeight: 700 }}>
-              <i className="fa-solid fa-tag fa-xs me-1"></i> Today's Deals
-            </Link>
+            <button
+              className="nav-cat-link"
+              onClick={onToggleAiAssistant}
+              style={{
+                marginLeft: 'auto',
+                color: '#FF9F00',
+                fontWeight: 700,
+                background: 'rgba(255,159,0,0.12)',
+                border: '1px solid rgba(255,159,0,0.3)',
+                borderRadius: '4px',
+                cursor: 'pointer',
+              }}
+            >
+              <i className="fa-solid fa-sparkles me-1"></i> Ask AI Assistant
+            </button>
           </div>
         </div>
       )}
