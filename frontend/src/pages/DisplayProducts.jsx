@@ -39,7 +39,7 @@ const DisplayProducts = ({ onOpenAddProduct }) => {
                 <tr key={p.pid}>
                   <td>
                     <img
-                      src={p.image ? `/Images/${p.image}` : '/Images/product.png'}
+                      src={p.image ? (p.image.startsWith('http') ? p.image : `/Images/${p.image}`) : '/Images/product.png'}
                       alt={p.name}
                       style={{ width: '45px', height: '45px', objectFit: 'contain' }}
                       onError={(e) => { e.target.src = '/Images/product.png'; }}

@@ -43,7 +43,7 @@ const ProductDetail = () => {
           <div className="col-md-5 d-flex align-items-center justify-content-center p-5"
             style={{ background: 'radial-gradient(circle at center, #eef2ff 0%, #f8fafc 100%)', minHeight: '380px' }}>
             <img
-              src={product.image ? `/Images/${product.image}` : '/Images/product.png'}
+              src={product.image ? (product.image.startsWith('http') ? product.image : `/Images/${product.image}`) : '/Images/product.png'}
               alt={product.name}
               style={{ maxHeight: '300px', maxWidth: '100%', objectFit: 'contain' }}
               onError={(e) => { e.target.src = '/Images/product.png'; }}
