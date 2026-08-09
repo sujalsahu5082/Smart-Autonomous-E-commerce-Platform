@@ -68,6 +68,56 @@ PRODUCTS = [
         "price": 8000, "quantity": 11, "discount": 16, "image": "mattress.jpeg", "category": "Home & Furniture",
         "tags": ["mattress", "coir", "queen"],
     },
+    # ---- Additional Electronics ----
+    {
+        "name": "Sony WH-1000XM5 Wireless Headphones",
+        "description": "Industry-leading noise cancellation with two processors and 8 microphones for unparalleled sound quality and crystal clear hands-free calling.",
+        "price": 29990, "quantity": 15, "discount": 15, "image": "product.png", "category": "Electronics",
+        "tags": ["headphones", "sony", "noise-canceling", "bluetooth"],
+    },
+    {
+        "name": "Apple Watch Series 9 GPS 45mm",
+        "description": "Advanced health sensors, Double Tap gesture control, brighter Always-On Retina display, and powerful S9 SiP chip.",
+        "price": 41900, "quantity": 20, "discount": 12, "image": "product.png", "category": "Electronics",
+        "tags": ["apple", "smartwatch", "fitness", "oled"],
+    },
+    {
+        "name": "Canon EOS R50 Mirrorless Camera",
+        "description": "Compact 24.2 MP APS-C sensor camera featuring Dual Pixel CMOS AF II, 4K 30p uncropped video recording, and high-speed shooting.",
+        "price": 64995, "quantity": 8, "discount": 10, "image": "product.png", "category": "Electronics",
+        "tags": ["camera", "canon", "mirrorless", "4k"],
+    },
+    {
+        "name": "JBL Flip 6 Portable Bluetooth Speaker",
+        "description": "Bold sound with 2-way speaker system, IP67 waterproof and dustproof rating, 12 hours of playtime, and PartyBoost pairing.",
+        "price": 11999, "quantity": 35, "discount": 25, "image": "product.png", "category": "Electronics",
+        "tags": ["speaker", "jbl", "bluetooth", "waterproof"],
+    },
+    # ---- Additional Clothes & Fashion ----
+    {
+        "name": "Women Floral Print A-Line Maxi Dress",
+        "description": "Elegant breathable rayon fabric maxi dress featuring stylish flutter sleeves and a tiered flared hemline.",
+        "price": 2499, "quantity": 25, "discount": 40, "image": "cloths.png", "category": "Clothes & Fashion",
+        "tags": ["women", "dress", "fashion", "floral"],
+    },
+    {
+        "name": "Men Slim Fit Stretchable Denim Jeans",
+        "description": "Premium cotton-stretch dark indigo denim jeans with classic 5-pocket styling and comfortable slim fit.",
+        "price": 2999, "quantity": 30, "discount": 45, "image": "cloths.png", "category": "Clothes & Fashion",
+        "tags": ["men", "jeans", "denim", "fashion"],
+    },
+    {
+        "name": "Unisex Heavyweight Oversized Hoodie",
+        "description": "Ultra-soft 380 GSM fleece lined cotton hoodie featuring dropped shoulders and a kangaroo front pocket.",
+        "price": 3499, "quantity": 22, "discount": 35, "image": "cloths.png", "category": "Clothes & Fashion",
+        "tags": ["unisex", "hoodie", "streetwear", "cotton"],
+    },
+    {
+        "name": "Women Genuine Leather Crossbody Sling Bag",
+        "description": "Crafted from 100% genuine top-grain leather with adjustable strap, gold-tone hardware, and multi-compartment storage.",
+        "price": 4299, "quantity": 18, "discount": 30, "image": "cloths.png", "category": "Clothes & Fashion",
+        "tags": ["women", "bag", "handbag", "leather"],
+    },
 ]
 
 COUPONS = [
@@ -85,9 +135,9 @@ async def seed() -> None:
     async with SessionLocal() as session:
         from sqlalchemy import select
 
-        if (await session.execute(select(Category).limit(1))).scalar_one_or_none() is not None:
-            print("Categories already exist; skipping catalog seed.")
-        else:
+        # Seed admin if missing
+        admin_stmt = select(Admin).where(Admin.email == "admin@smartecommerce.com")
+        if (await session.execute(admin_stmt)).scalar_one_or_none() is None:
             admin = Admin(
                 name="Admin User",
                 email="admin@smartecommerce.com",
@@ -96,37 +146,54 @@ async def seed() -> None:
             )
             session.add(admin)
 
-            cat_map = {}
-            for c in CATEGORIES:
+        # Seed categories if missing
+        cat_map = {}
+        for c in CATEGORIES:
+            stmt = select(Category).where(Category.name == c["name"])
+            existing_cat = (await session.execute(stmt)).scalar_one_or_none()
+            if existing_cat is None:
                 category = Category(**c)
                 session.add(category)
                 cat_map[c["name"]] = category
+            else:
+                cat_map[c["name"]] = existing_cat
 
-            for p in PRODUCTS:
-                session.add(
-                    Product(
-                        name=p["name"],
-                        description=p["description"],
-                        price=p["price"],
-                        quantity=p["quantity"],
-                        discount=p["discount"],
-                        image=p["image"],
-                        tags=p.get("tags", []),
-                        category=cat_map[p["category"]],
+        await session.flush()
+
+        # Seed products if missing
+        added_products = 0
+        for p in PRODUCTS:
+            stmt = select(Product).where(Product.name == p["name"])
+            if (await session.execute(stmt)).scalar_one_or_none() is None:
+                category_obj = cat_map.get(p["category"])
+                if category_obj:
+                    session.add(
+                        Product(
+                            name=p["name"],
+                            description=p["description"],
+                            price=p["price"],
+                            quantity=p["quantity"],
+                            discount=p["discount"],
+                            image=p["image"],
+                            tags=p.get("tags", []),
+                            category=category_obj,
+                        )
                     )
-                )
-            await session.commit()
-            print(f"Seeded {len(CATEGORIES)} categories, {len(PRODUCTS)} products, and the admin account.")
+                    added_products += 1
 
+        await session.commit()
+        print(f"Catalog sync: added {added_products} new products across categories.")
+
+        # Seed coupons
         existing_codes = set((await session.execute(select(Coupon.code))).scalars().all())
-        added = 0
+        added_coupons = 0
         for c in COUPONS:
             if c["code"] not in existing_codes:
                 session.add(Coupon(**c))
-                added += 1
-        if added:
+                added_coupons += 1
+        if added_coupons:
             await session.commit()
-        print(f"Seeded {added} new coupons ({len(existing_codes)} already present).")
+        print(f"Seeded {added_coupons} new coupons ({len(existing_codes)} already present).")
 
 
 if __name__ == "__main__":
