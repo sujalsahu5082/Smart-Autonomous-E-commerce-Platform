@@ -59,4 +59,17 @@ async def create_review(
         await db.commit()
         await db.refresh(review)
     result = await db.execute(select(Review).options(joinedload(Review.user)).where(Review.id == review.id))
-    return _review_to_out(result.scalar_one())
+    saved = result.scalar_one()
+    from ai.indexer import index_review
+
+    await index_review(
+        {
+            "id": saved.id,
+            "productId": saved.productId,
+            "userId": saved.userId,
+            "rating": saved.rating,
+            "comment": saved.comment or "",
+            "user_name": saved.user.name if saved.user else None,
+        }
+    )
+    return _review_to_out(saved)

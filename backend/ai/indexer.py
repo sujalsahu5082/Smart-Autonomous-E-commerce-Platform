@@ -18,3 +18,17 @@ async def remove_product(pid: int) -> None:
         await retriever.adelete(pid)
     except Exception:
         logger.exception("Failed to remove product %s from vector store", pid)
+
+
+async def index_review(review: dict[str, Any]) -> None:
+    try:
+        await retriever.aupsert_reviews([review])
+    except Exception:
+        logger.exception("Failed to index review %s in vector store", review.get("id"))
+
+
+async def remove_reviews_for_product(product_id: int) -> None:
+    try:
+        await retriever.adelete_reviews_for_product(product_id)
+    except Exception:
+        logger.exception("Failed to remove reviews for product %s from vector store", product_id)
