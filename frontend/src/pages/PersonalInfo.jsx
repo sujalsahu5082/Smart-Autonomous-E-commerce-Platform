@@ -12,9 +12,9 @@ const PersonalInfo = () => {
   const [address, setAddress] = useState(activeUser ? activeUser.address || '' : '');
   const [successMsg, setSuccessMsg] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    updateUserProfile({ name, email, phone, address });
+    await updateUserProfile({ name, email, phone, address });
     setSuccessMsg('Profile updated successfully!');
     setTimeout(() => {
       setSuccessMsg('');

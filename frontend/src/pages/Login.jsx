@@ -10,10 +10,10 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    const res = loginUser(email.trim(), password);
+    const res = await loginUser(email.trim(), password);
     if (res.success) {
       navigate('/');
     } else {
