@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
@@ -9,6 +9,7 @@ from ai.discovery import run_discovery
 from app.api.deps import DbSession, get_optional_current_user
 from app.models import Order, Review, User, WishlistItem
 from app.schemas.product import ProductOut
+from app.services.chat_sessions import add_exchange, session_context
 from app.services.retrieval import retrieve_products
 
 router = APIRouter(prefix="/discovery", tags=["discovery"])
@@ -16,11 +17,14 @@ router = APIRouter(prefix="/discovery", tags=["discovery"])
 
 class ChatRequest(BaseModel):
     message: str = Field(min_length=1, max_length=500)
+    session_id: str | None = Field(default=None, max_length=100)
+    cart_context: dict[str, Any] | None = None
 
 
 class ChatResponse(BaseModel):
     answer: str
     products: list[ProductOut]
+    coupons: list[dict] = Field(default_factory=list)
     mode: str
 
 
@@ -59,10 +63,14 @@ async def discovery_chat(
     current_user: Annotated[User | None, Depends(get_optional_current_user)] = None,
 ):
     products = await retrieve_products(db, payload.message, top_k=10)
-    context = await _user_context(db, current_user) if current_user else None
+    context = await _user_context(db, current_user) if current_user else {}
+    context.update(session_context(payload.session_id, payload.cart_context))
     reviews = await _reviews_for(db, products)
-    from app.services.coupons import get_applicable_coupons
+    from app.services.coupons import coupon_to_dict, get_applicable_coupons
 
     coupons = await get_applicable_coupons(db, [p["cid"] for p in products])
     answer, mode = await run_discovery(payload.message, products, context, reviews, coupons)
-    return ChatResponse(answer=answer, products=products, mode=mode)
+    add_exchange(payload.session_id, payload.message, answer)
+    return ChatResponse(
+        answer=answer, products=products, coupons=[coupon_to_dict(c) for c in coupons], mode=mode
+    )

@@ -21,11 +21,17 @@ async def list_products(
     db: DbSession,
     category: int | None = Query(default=None),
     search: str | None = Query(default=None, max_length=100),
+    min_price: float | None = Query(default=None, ge=0),
+    max_price: float | None = Query(default=None, ge=0),
     limit: int = Query(default=50, ge=1, le=200),
 ):
     stmt = _base_query()
     if category is not None:
         stmt = stmt.where(Product.cid == category)
+    if min_price is not None:
+        stmt = stmt.where(Product.price >= min_price)
+    if max_price is not None:
+        stmt = stmt.where(Product.price <= max_price)
     if search:
         pattern = f"%{search.lower()}%"
         stmt = stmt.where(or_(func.lower(Product.name).like(pattern), func.lower(Product.description).like(pattern)))
