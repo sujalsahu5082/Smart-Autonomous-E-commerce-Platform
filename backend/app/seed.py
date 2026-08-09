@@ -31,7 +31,7 @@ PRODUCTS = [
         "name": "LG 242 L Frost Free Double Door Refrigerator",
         "description": "Smart Inverter Compressor designed to deliver energy-efficient performance with Door Cooling+ feature.",
         "price": 37099, "quantity": 50, "discount": 29,
-        "image": "https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=600&auto=format&fit=crop&q=80",
+        "image": "https://images.unsplash.com/photo-1571175443880-49e1d25b2bc5?w=600&auto=format&fit=crop&q=80",
         "category": "Appliances", "tags": ["refrigerator", "frost-free", "inverter"],
     },
     {
