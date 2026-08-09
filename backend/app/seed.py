@@ -117,7 +117,7 @@ PRODUCTS = [
         "name": "Men Slim Fit Stretchable Denim Jeans",
         "description": "Premium cotton-stretch dark indigo denim jeans with classic 5-pocket styling and comfortable slim fit.",
         "price": 2999, "quantity": 30, "discount": 45,
-        "image": "https://images.unsplash.com/photo-1542272604-780c96856592?w=600&auto=format&fit=crop&q=80",
+        "image": "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=600&auto=format&fit=crop&q=80",
         "category": "Clothes & Fashion", "tags": ["men", "jeans", "denim", "fashion"],
     },
     {
