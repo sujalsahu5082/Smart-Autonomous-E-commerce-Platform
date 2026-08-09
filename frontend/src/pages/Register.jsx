@@ -13,10 +13,10 @@ const Register = () => {
   const [address, setAddress] = useState('');
   const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    const res = registerUser({
+    const res = await registerUser({
       name: name.trim(),
       email: email.trim(),
       password,

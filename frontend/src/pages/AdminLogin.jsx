@@ -10,10 +10,10 @@ const AdminLogin = () => {
   const [password, setPassword] = useState('admin');
   const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    const res = loginAdmin(email.trim(), password);
+    const res = await loginAdmin(email.trim(), password);
     if (res.success) {
       navigate('/admin');
     } else {

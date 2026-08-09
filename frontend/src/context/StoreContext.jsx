@@ -1,307 +1,371 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { api, setAuth, clearAuth } from '../api/client';
 
 const StoreContext = createContext();
 
-const initialCategories = [
-  { cid: 1, name: 'Mobiles', image: 'mobiles.jpeg' },
-  { cid: 2, name: 'Appliances', image: 'appliances.png' },
-  { cid: 3, name: 'Laptops', image: 'newlaptop.jpeg' },
-  { cid: 4, name: 'Home & Furniture', image: 'home-furniture.png' },
-  { cid: 5, name: 'Books', image: 'books-.png' },
-  { cid: 6, name: 'Clothes & Fashion', image: 'cloths.png' },
-  { cid: 7, name: 'Electronics', image: 'electronics.png' }
-];
+const mapOrder = (o) => ({
+  id: o.id,
+  orderId: o.orderid,
+  date: (o.date || '').split('T')[0],
+  status: o.status,
+  userId: o.userId,
+  userName: o.userName,
+  userPhone: o.userPhone,
+  items: (o.items || []).map((i) => ({
+    product: { pid: i.productId, name: i.name, price: i.price, image: i.image },
+    quantity: i.quantity
+  })),
+  totalAmount: o.totalAmount,
+  paymentMethod: o.paymentType,
+  shippingAddress: o.shippingAddress
+});
 
-const initialProducts = [
-  {
-    pid: 1,
-    name: 'SAMSUNG Galaxy F14 5G',
-    description: 'The Samsung Galaxy F14 smartphone uses a segment-only 5nm processor that enables easy multitasking, gaming, and a 6000 mAh battery.',
-    price: 18490,
-    quantity: 9,
-    discount: 24,
-    image: 'phone1.jpeg',
-    cid: 1
-  },
-  {
-    pid: 2,
-    name: 'LG 242 L Frost Free Double Door Refrigerator',
-    description: 'Smart Inverter Compressor designed to deliver energy-efficient performance with Door Cooling+ feature.',
-    price: 37099,
-    quantity: 50,
-    discount: 29,
-    image: 'fridge1.jpeg',
-    cid: 2
-  },
-  {
-    pid: 3,
-    name: 'OnePlus Y1S Pro 138 cm Ultra HD (4K) Smart TV',
-    description: 'Gamma Engine smart contrast and color max display quality for an unmatched immersive experience.',
-    price: 49999,
-    quantity: 5,
-    discount: 18,
-    image: 'tv1.jpeg',
-    cid: 2
-  },
-  {
-    pid: 8,
-    name: 'Samsung Galaxy S23 5G',
-    description: 'Flagship smartphone with Snapdragon 8 Gen 2, dynamic AMOLED 2X display, and nightography camera.',
-    price: 79999,
-    quantity: 10,
-    discount: 17,
-    image: 'Samsung_Galaxy.jpg',
-    cid: 1
-  },
-  {
-    pid: 9,
-    name: 'ASUS TUF Gaming A15',
-    description: '15.6 inch Full HD 144Hz IPS display, AMD Ryzen 7, NVIDIA RTX graphics card.',
-    price: 71990,
-    quantity: 11,
-    discount: 20,
-    image: 'asus_tuf.jpeg',
-    cid: 3
-  },
-  {
-    pid: 10,
-    name: 'Men Printed Casual Jacket',
-    description: 'Pure Cotton hooded casual jacket with zipper closure.',
-    price: 1999,
-    quantity: 15,
-    discount: 57,
-    image: 'men_jacket.jpeg',
-    cid: 6
-  },
-  {
-    pid: 12,
-    name: 'boAt Airdopes 161 with 40 Hours Playback',
-    description: '10mm drivers, ASAP Charge, 40 hours playback time, IPX5 water resistance.',
-    price: 2400,
-    quantity: 27,
-    discount: 42,
-    image: 'boat-airdopes.jpeg',
-    cid: 7
-  },
-  {
-    pid: 13,
-    name: 'KURLON Natural Product 5 inch Queen Mattress',
-    description: 'Firm support coir mattress with PU foam layer.',
-    price: 8000,
-    quantity: 11,
-    discount: 16,
-    image: 'mattress.jpeg',
-    cid: 4
-  }
-];
-
-const initialAdmins = [
-  { id: 1, name: 'Admin User', email: 'admin@smartecommerce.com', password: 'admin', phone: '9876543210' }
-];
+const mapOrderForAdmin = (o, users) => {
+  const user = users.find((u) => u.id === o.userId);
+  return { ...mapOrder(o), userName: user ? user.name : 'Guest', userPhone: user ? user.phone : '-' };
+};
 
 export const StoreProvider = ({ children }) => {
-  const getStored = (key, fallback) => {
+  const [categories, setCategories] = useState([]);
+  const [products, setProducts] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [admins, setAdmins] = useState([]);
+  const [activeUser, setActiveUser] = useState(null);
+  const [activeAdmin, setActiveAdmin] = useState(null);
+  const [cart, setCart] = useState([]);
+  const [wishlist, setWishlist] = useState([]);
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // ---- helpers -------------------------------------------------------------
+
+  const loadCatalog = useCallback(async () => {
     try {
-      const item = localStorage.getItem(key);
-      if (!item) return fallback;
-      const parsed = JSON.parse(item);
-      // Sanitize legacy name if present
-      if (Array.isArray(parsed)) {
-        return parsed.map(a => a && a.name === 'Anirudh Bhagat' ? { ...a, name: 'Admin User' } : a);
-      }
-      if (parsed && parsed.name === 'Anirudh Bhagat') {
-        return { ...parsed, name: 'Admin User' };
-      }
-      return parsed;
+      const [cats, prods] = await Promise.all([api.get('/categories'), api.get('/products')]);
+      setCategories(cats);
+      setProducts(prods);
     } catch (e) {
-      return fallback;
+      console.error('Failed to load catalog', e);
     }
-  };
+  }, []);
 
-  const setStored = (key, value) => {
+  const loadUserData = useCallback(async () => {
     try {
-      localStorage.setItem(key, JSON.stringify(value));
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  // State definitions
-  const [categories, setCategories] = useState(() => getStored('ez_categories', initialCategories));
-  const [products, setProducts] = useState(() => getStored('ez_products', initialProducts));
-  const [users, setUsers] = useState(() => getStored('ez_users', []));
-  const [admins, setAdmins] = useState(() => getStored('ez_admins', initialAdmins));
-  const [activeUser, setActiveUser] = useState(() => getStored('ez_active_user', null));
-  const [activeAdmin, setActiveAdmin] = useState(() => getStored('ez_active_admin', null));
-  const [cart, setCart] = useState(() => getStored('ez_cart', []));
-  const [wishlist, setWishlist] = useState(() => getStored('ez_wishlist', []));
-  const [orders, setOrders] = useState(() => getStored('ez_orders', []));
-
-  // Sync to localStorage
-  useEffect(() => setStored('ez_categories', categories), [categories]);
-  useEffect(() => setStored('ez_products', products), [products]);
-  useEffect(() => setStored('ez_users', users), [users]);
-  useEffect(() => setStored('ez_admins', admins), [admins]);
-  useEffect(() => setStored('ez_active_user', activeUser), [activeUser]);
-  useEffect(() => setStored('ez_active_admin', activeAdmin), [activeAdmin]);
-  useEffect(() => setStored('ez_cart', cart), [cart]);
-  useEffect(() => setStored('ez_wishlist', wishlist), [wishlist]);
-  useEffect(() => setStored('ez_orders', orders), [orders]);
-
-  // Auth Operations
-  const registerUser = (userData) => {
-    if (users.some(u => u.email === userData.email)) {
-      return { success: false, message: 'Email already registered!' };
-    }
-    const newUser = { id: Date.now(), ...userData };
-    const updated = [...users, newUser];
-    setUsers(updated);
-    setActiveUser(newUser);
-    return { success: true, user: newUser };
-  };
-
-  const loginUser = (email, password) => {
-    const user = users.find(u => u.email === email && u.password === password);
-    if (user) {
+      const [user, cartData, wishData, orderData] = await Promise.all([
+        api.get('/auth/me'),
+        api.get('/cart'),
+        api.get('/wishlist'),
+        api.get('/orders')
+      ]);
       setActiveUser(user);
+      setCart(cartData);
+      setWishlist(wishData.map((w) => w.product).filter(Boolean));
+      setOrders(orderData.map(mapOrder));
+    } catch (e) {
+      console.error('Failed to restore session', e);
+      clearAuth();
+      setActiveUser(null);
       setActiveAdmin(null);
-      return { success: true, user };
     }
-    return { success: false, message: 'Invalid email or password' };
+  }, []);
+
+  const loadAdminData = useCallback(async () => {
+    try {
+      const [admin, userList, adminList, orderList] = await Promise.all([
+        api.get('/auth/me'),
+        api.get('/admin/users'),
+        api.get('/admin/admins'),
+        api.get('/admin/orders')
+      ]);
+      setActiveAdmin(admin);
+      setUsers(userList);
+      setAdmins(adminList);
+      setOrders(orderList.map((o) => mapOrderForAdmin(o, userList)));
+    } catch (e) {
+      console.error('Failed to load admin data', e);
+      clearAuth();
+      setActiveAdmin(null);
+    }
+  }, []);
+
+  // ---- initial load --------------------------------------------------------
+
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      await loadCatalog();
+      if (localStorage.getItem('ez_role') === 'admin') {
+        await loadAdminData();
+      } else if (localStorage.getItem('ez_token')) {
+        await loadUserData();
+      }
+      setLoading(false);
+    })();
+  }, [loadCatalog, loadUserData, loadAdminData]);
+
+  // ---- Auth Operations -----------------------------------------------------
+
+  const registerUser = async (userData) => {
+    try {
+      const res = await api.post('/auth/register', userData);
+      setAuth(res.access_token, 'user');
+      setActiveUser(res.user);
+      setActiveAdmin(null);
+      setCart([]);
+      setWishlist([]);
+      setOrders([]);
+      return { success: true, user: res.user };
+    } catch (e) {
+      return { success: false, message: e.message };
+    }
   };
 
-  const loginAdmin = (email, password) => {
-    const admin = admins.find(a => a.email === email && a.password === password);
-    if (admin) {
-      setActiveAdmin(admin);
-      setActiveUser(null);
-      return { success: true, admin };
+  const loginUser = async (email, password) => {
+    try {
+      const res = await api.post('/auth/login', { email, password });
+      setAuth(res.access_token, 'user');
+      setActiveUser(res.user);
+      setActiveAdmin(null);
+      await loadUserData();
+      return { success: true, user: res.user };
+    } catch (e) {
+      return { success: false, message: e.message };
     }
-    return { success: false, message: 'Invalid admin credentials' };
+  };
+
+  const loginAdmin = async (email, password) => {
+    try {
+      const res = await api.post('/auth/admin-login', { email, password });
+      setAuth(res.access_token, 'admin');
+      setActiveAdmin(res.admin);
+      setActiveUser(null);
+      await loadAdminData();
+      return { success: true, admin: res.admin };
+    } catch (e) {
+      return { success: false, message: e.message };
+    }
   };
 
   const logout = () => {
+    clearAuth();
     setActiveUser(null);
     setActiveAdmin(null);
+    setCart([]);
+    setWishlist([]);
+    setOrders([]);
+    setUsers([]);
+    setAdmins([]);
   };
 
-  const updateUserProfile = (updatedData) => {
+  const updateUserProfile = async (updatedData) => {
+    try {
+      const user = await api.put('/auth/me', updatedData);
+      setActiveUser(user);
+      return { success: true };
+    } catch (e) {
+      return { success: false, message: e.message };
+    }
+  };
+
+  // ---- Cart Operations -----------------------------------------------------
+
+  const refreshCart = async () => {
+    try {
+      const data = await api.get('/cart');
+      setCart(data);
+    } catch (e) {
+      console.error('Failed to refresh cart', e);
+    }
+  };
+
+  const addToCart = async (product, qty = 1) => {
     if (!activeUser) return;
-    const updatedUser = { ...activeUser, ...updatedData };
-    setActiveUser(updatedUser);
-    setUsers(users.map(u => u.id === activeUser.id ? updatedUser : u));
-    return { success: true };
-  };
-
-  // Cart Operations
-  const addToCart = (product, qty = 1) => {
-    const existingIndex = cart.findIndex(item => item.product.pid === product.pid);
-    if (existingIndex > -1) {
-      const updatedCart = [...cart];
-      updatedCart[existingIndex].quantity += qty;
-      setCart(updatedCart);
-    } else {
-      setCart([...cart, { product, quantity: qty }]);
+    try {
+      await api.post('/cart', { pid: product.pid, quantity: qty });
+      await refreshCart();
+    } catch (e) {
+      console.error(e.message);
     }
   };
 
-  const updateCartQuantity = (pid, quantity) => {
+  const updateCartQuantity = async (pid, quantity) => {
     if (quantity <= 0) {
-      removeFromCart(pid);
-    } else {
-      setCart(cart.map(item => item.product.pid === pid ? { ...item, quantity } : item));
+      await removeFromCart(pid);
+      return;
+    }
+    const item = cart.find((i) => i.product && i.product.pid === pid);
+    if (!item) return;
+    try {
+      await api.put(`/cart/${item.id}`, { quantity });
+      await refreshCart();
+    } catch (e) {
+      console.error(e.message);
     }
   };
 
-  const removeFromCart = (pid) => {
-    setCart(cart.filter(item => item.product.pid !== pid));
+  const removeFromCart = async (pid) => {
+    const item = cart.find((i) => i.product && i.product.pid === pid);
+    if (!item) return;
+    try {
+      await api.delete(`/cart/${item.id}`);
+      await refreshCart();
+    } catch (e) {
+      console.error(e.message);
+    }
   };
 
   const clearCart = () => setCart([]);
 
-  // Wishlist Operations
-  const toggleWishlist = (product) => {
-    const exists = wishlist.some(p => p.pid === product.pid);
-    if (exists) {
-      setWishlist(wishlist.filter(p => p.pid !== product.pid));
-    } else {
-      setWishlist([...wishlist, product]);
+  // ---- Wishlist Operations -------------------------------------------------
+
+  const refreshWishlist = async () => {
+    try {
+      const data = await api.get('/wishlist');
+      setWishlist(data.map((w) => w.product).filter(Boolean));
+    } catch (e) {
+      console.error('Failed to refresh wishlist', e);
     }
   };
 
-  const isInWishlist = (pid) => wishlist.some(p => p.pid === pid);
-
-  // Category CRUD
-  const addCategory = (category) => {
-    const newCat = { cid: Date.now(), ...category };
-    setCategories([...categories, newCat]);
-    return newCat;
+  const toggleWishlist = async (product) => {
+    const exists = wishlist.some((p) => p.pid === product.pid);
+    try {
+      if (exists) {
+        await api.delete(`/wishlist/${product.pid}`);
+      } else {
+        await api.post('/wishlist', { pid: product.pid });
+      }
+      await refreshWishlist();
+    } catch (e) {
+      console.error(e.message);
+    }
   };
 
-  const updateCategory = (cid, updated) => {
-    setCategories(categories.map(c => c.cid === Number(cid) ? { ...c, ...updated } : c));
+  const isInWishlist = (pid) => wishlist.some((p) => p.pid === pid);
+
+  // ---- Category CRUD (admin) ----------------------------------------------
+
+  const addCategory = async (category) => {
+    try {
+      const created = await api.post('/categories', category);
+      setCategories([...categories, created]);
+    } catch (e) {
+      console.error(e.message);
+    }
   };
 
-  const deleteCategory = (cid) => {
-    setCategories(categories.filter(c => c.cid !== Number(cid)));
+  const updateCategory = async (cid, updated) => {
+    try {
+      const data = await api.put(`/categories/${cid}`, updated);
+      setCategories(categories.map((c) => (c.cid === Number(cid) ? { ...c, ...data } : c)));
+    } catch (e) {
+      console.error(e.message);
+    }
   };
 
-  // Product CRUD
-  const addProduct = (product) => {
-    const newProd = { pid: Date.now(), ...product };
-    setProducts([...products, newProd]);
-    return newProd;
+  const deleteCategory = async (cid) => {
+    try {
+      await api.delete(`/categories/${cid}`);
+      setCategories(categories.filter((c) => c.cid !== Number(cid)));
+    } catch (e) {
+      console.error(e.message);
+    }
   };
 
-  const updateProduct = (pid, updated) => {
-    setProducts(products.map(p => p.pid === Number(pid) ? { ...p, ...updated } : p));
+  // ---- Product CRUD (admin) ------------------------------------------------
+
+  const addProduct = async (product) => {
+    try {
+      const created = await api.post('/products', product);
+      setProducts([...products, created]);
+    } catch (e) {
+      console.error(e.message);
+    }
   };
 
-  const deleteProduct = (pid) => {
-    setProducts(products.filter(p => p.pid !== Number(pid)));
+  const updateProduct = async (pid, updated) => {
+    try {
+      const data = await api.put(`/products/${pid}`, updated);
+      setProducts(products.map((p) => (p.pid === Number(pid) ? { ...p, ...data } : p)));
+    } catch (e) {
+      console.error(e.message);
+    }
   };
 
-  // Orders
-  const placeOrder = (orderData) => {
-    const newOrder = {
-      orderId: 'ORD-' + Math.floor(100000 + Math.random() * 900000),
-      date: new Date().toISOString().split('T')[0],
-      status: 'Order Placed',
-      userId: activeUser ? activeUser.id : null,
-      userName: activeUser ? activeUser.name : orderData.name,
-      userPhone: activeUser ? activeUser.phone : orderData.phone,
-      items: [...cart],
-      totalAmount: orderData.totalAmount,
-      paymentMethod: orderData.paymentMethod,
-      shippingAddress: orderData.shippingAddress
-    };
-
-    setOrders([newOrder, ...orders]);
-    clearCart();
-    return newOrder;
+  const deleteProduct = async (pid) => {
+    try {
+      await api.delete(`/products/${pid}`);
+      setProducts(products.filter((p) => p.pid !== Number(pid)));
+    } catch (e) {
+      console.error(e.message);
+    }
   };
 
-  const updateOrderStatus = (orderId, status) => {
-    setOrders(orders.map(o => o.orderId === orderId ? { ...o, status } : o));
+  // ---- Orders --------------------------------------------------------------
+
+  const placeOrder = async (orderData) => {
+    try {
+      const created = await api.post('/orders', {
+        items: cart.map((i) => ({ productId: i.product.pid, quantity: i.quantity })),
+        paymentMethod: orderData.paymentMethod,
+        shippingAddress: orderData.shippingAddress
+      });
+      const mapped = {
+        ...mapOrder(created),
+        userName: activeUser ? activeUser.name : orderData.name,
+        userPhone: activeUser ? activeUser.phone : orderData.phone
+      };
+      setOrders([mapped, ...orders]);
+      setCart([]);
+      return mapped;
+    } catch (e) {
+      throw new Error(e.message);
+    }
   };
 
-  // User & Admin Management
-  const deleteUser = (userId) => {
-    setUsers(users.filter(u => u.id !== userId));
+  const updateOrderStatus = async (orderId, status) => {
+    const order = orders.find((o) => o.orderId === orderId);
+    if (!order) return;
+    try {
+      const data = await api.put(`/orders/${order.id}`, { status });
+      setOrders(orders.map((o) => (o.id === data.id ? mapOrderForAdmin(data, users) : o)));
+    } catch (e) {
+      console.error(e.message);
+    }
   };
 
-  const addAdmin = (adminData) => {
-    const newAdmin = { id: Date.now(), ...adminData };
-    setAdmins([...admins, newAdmin]);
+  // ---- User & Admin Management (admin) -------------------------------------
+
+  const deleteUser = async (userId) => {
+    try {
+      await api.delete(`/admin/users/${userId}`);
+      setUsers(users.filter((u) => u.id !== userId));
+    } catch (e) {
+      console.error(e.message);
+    }
   };
 
-  const deleteAdmin = (adminId) => {
-    setAdmins(admins.filter(a => a.id !== adminId));
+  const addAdmin = async (adminData) => {
+    try {
+      const created = await api.post('/admin/admins', adminData);
+      setAdmins([...admins, created]);
+    } catch (e) {
+      console.error(e.message);
+    }
+  };
+
+  const deleteAdmin = async (adminId) => {
+    try {
+      await api.delete(`/admin/admins/${adminId}`);
+      setAdmins(admins.filter((a) => a.id !== adminId));
+    } catch (e) {
+      console.error(e.message);
+    }
   };
 
   return (
     <StoreContext.Provider value={{
-      categories, products, users, admins, activeUser, activeAdmin, cart, wishlist, orders,
+      categories, products, users, admins, activeUser, activeAdmin, cart, wishlist, orders, loading,
       registerUser, loginUser, loginAdmin, logout, updateUserProfile,
       addToCart, updateCartQuantity, removeFromCart, clearCart,
       toggleWishlist, isInWishlist,

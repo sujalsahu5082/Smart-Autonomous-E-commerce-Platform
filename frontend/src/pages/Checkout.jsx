@@ -12,6 +12,7 @@ const Checkout = () => {
   const [city, setCity] = useState('');
   const [pincode, setPincode] = useState('');
   const [paymentMethod, setPaymentMethod] = useState('COD');
+  const [error, setError] = useState('');
 
   const totalOriginal = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
   const totalDiscount = cart.reduce((sum, item) => {
@@ -20,20 +21,23 @@ const Checkout = () => {
   }, 0);
   const grandTotal = Math.round(totalOriginal - totalDiscount);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name || !phone || !address) return;
 
     const fullAddress = `${address}, ${city} - ${pincode}`;
-    const newOrder = placeOrder({
-      name,
-      phone,
-      shippingAddress: fullAddress,
-      totalAmount: grandTotal,
-      paymentMethod
-    });
-
-    navigate('/order', { state: { orderId: newOrder.orderId } });
+    try {
+      const newOrder = await placeOrder({
+        name,
+        phone,
+        shippingAddress: fullAddress,
+        totalAmount: grandTotal,
+        paymentMethod
+      });
+      navigate('/order', { state: { orderId: newOrder.orderId } });
+    } catch (err) {
+      setError(err.message || 'Failed to place order');
+    }
   };
 
   if (cart.length === 0) {
@@ -48,6 +52,8 @@ const Checkout = () => {
   return (
     <div class="container py-5">
       <h3 class="fw-bold mb-4"><i class="fa-solid fa-credit-card text-primary me-2"></i>Checkout & Payment</h3>
+
+      {error && <div class="alert alert-danger py-2">{error}</div>}
 
       <form onSubmit={handleSubmit}>
         <div class="row g-4">
