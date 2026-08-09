@@ -9,10 +9,13 @@ def test_filter_by_budget():
         {"pid": 2, "name": "Mid", "price": 500, "price_after_discount": 450},
         {"pid": 3, "name": "Expensive", "price": 1000, "price_after_discount": 900},
     ]
-    hits = tools.filter_by_budget(products, max_price=500)
+    import json as _json
+
+    hits = tools.filter_by_budget(_json.dumps(products), "500")
     assert [p["pid"] for p in hits] == [1, 2]
-    assert tools.filter_by_budget(products, max_price=100, min_price=100) == []
-    assert tools.filter_by_budget(products, max_price=2000, min_price=90)[0]["pid"] == 2
+    assert tools.filter_by_budget(_json.dumps(products), "100", "100") == []
+    assert tools.filter_by_budget(_json.dumps(products), "2000", "90")[0]["pid"] == 2
+    assert tools.filter_by_budget("not json", "500") == []
 
 
 def test_query_chromadb_and_reviews_tools(tmp_path, monkeypatch):
@@ -21,12 +24,13 @@ def test_query_chromadb_and_reviews_tools(tmp_path, monkeypatch):
     r.upsert_reviews([{"id": 1, "productId": 10, "userId": 1, "rating": 5, "comment": "Excellent"}])
     monkeypatch.setattr(tools, "retriever", r)
 
-    found = tools.query_chromadb_products("laptop", top_k=1)
+    found = tools.query_chromadb_products("laptop", "1")
     assert found[0]["pid"] == 10
+    assert tools.query_chromadb_products("laptop", "abc")  # non-numeric top_k tolerated
 
-    ctx = tools.get_reviews_context(10)
+    ctx = tools.get_reviews_context("10")
     assert len(ctx) == 1 and ctx[0]["rating"] == 5
-    assert tools.get_reviews_context(99) == []
+    assert tools.get_reviews_context("99") == []
 
 
 def test_get_applicable_coupons_tool(tmp_path, monkeypatch):
@@ -55,9 +59,10 @@ def test_get_applicable_coupons_tool(tmp_path, monkeypatch):
     asyncio.run(_setup())
     monkeypatch.setattr(tools, "SessionLocal", factory)
 
-    hits = tools.get_applicable_coupons([1])
+    hits = tools.get_applicable_coupons("[1]")
     codes = {h["code"] for h in hits}
     assert codes == {"ALL", "MOB"}
 
-    assert [h["code"] for h in tools.get_applicable_coupons([3])] == ["ALL", "LAP"]
+    assert [h["code"] for h in tools.get_applicable_coupons("[3]")] == ["ALL", "LAP"]
+    assert [h["code"] for h in tools.get_applicable_coupons("bad json")] == ["ALL"]
     asyncio.run(engine.dispose())

@@ -3,6 +3,7 @@ from httpx import ASGITransport, AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
+from app.core.config import settings
 from app.core.security import hash_password
 from app.db.base import Base
 from app.db.session import get_db
@@ -10,6 +11,12 @@ from app.main import app
 from app.models import Admin
 
 TEST_DB_URL = "sqlite+aiosqlite:///./test_ecommerce.db"
+
+
+@pytest.fixture(autouse=True)
+def _no_groq_key():
+    """Tests must not hit the real Groq API; test_llm overrides per-test."""
+    settings.groq_api_key = None
 
 
 @pytest.fixture

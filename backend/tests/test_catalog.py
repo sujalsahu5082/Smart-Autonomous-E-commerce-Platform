@@ -60,6 +60,12 @@ async def test_products_crud_and_filtering(client, admin_token):
     resp = await client.get("/api/products", params={"search": "laptop"})
     assert len(resp.json()) == 1
 
+    resp = await client.get("/api/products", params={"min_price": 10, "max_price": 500})
+    assert [p["name"] for p in resp.json()] == ["Python Book"]
+
+    resp = await client.get("/api/products", params={"min_price": 900})
+    assert [p["name"] for p in resp.json()] == ["Laptop"]
+
     pid = body["pid"]
     resp = await client.get(f"/api/products/{pid}")
     assert resp.status_code == 200
