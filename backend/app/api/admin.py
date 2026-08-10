@@ -17,6 +17,12 @@ from app.schemas.user import UserOut
 router = APIRouter(prefix="/admin", tags=["admin"])
 
 
+@router.get("/me", response_model=AdminOut)
+async def get_admin_me(current_admin: Annotated[Admin, Depends(get_current_admin)]):
+    return current_admin
+
+
+
 @router.get("/stats")
 async def dashboard_stats(db: DbSession, current_admin: Annotated[Admin, Depends(get_current_admin)]):
     counts = {}

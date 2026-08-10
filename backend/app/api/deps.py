@@ -55,3 +55,23 @@ async def get_optional_current_user(
     if error or not payload or payload.get("role") != "user":
         return None
     return await db.get(User, int(payload["sub"]))
+
+
+async def get_current_user_or_admin(
+    db: DbSession, token: Annotated[str | None, Depends(oauth2_scheme)]
+) -> User | Admin:
+    payload, error = _user_from_token(db, token)
+    if error or not payload:
+        raise _unauthorized()
+    role = payload.get("role")
+    sub = payload.get("sub")
+    if role == "admin":
+        admin = await db.get(Admin, int(sub))
+        if admin:
+            return admin
+    elif role == "user":
+        user = await db.get(User, int(sub))
+        if user:
+            return user
+    raise _unauthorized()
+
