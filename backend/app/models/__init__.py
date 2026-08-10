@@ -1,6 +1,7 @@
 from app.models.admin import Admin
 from app.models.cart import CartItem
 from app.models.category import Category
+from app.models.chat_log import ChatLog
 from app.models.coupon import Coupon
 from app.models.order import Order, OrderedProduct
 from app.models.product import Product
@@ -12,6 +13,7 @@ __all__ = [
     "Admin",
     "CartItem",
     "Category",
+    "ChatLog",
     "Coupon",
     "Order",
     "OrderedProduct",

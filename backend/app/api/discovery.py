@@ -1,3 +1,4 @@
+import logging
 from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends
@@ -9,8 +10,11 @@ from ai.discovery import run_discovery
 from app.api.deps import DbSession, get_optional_current_user
 from app.models import Order, Review, User, WishlistItem
 from app.schemas.product import ProductOut
+from app.services.analytics import log_chat
 from app.services.chat_sessions import add_exchange, session_context
 from app.services.retrieval import retrieve_products
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/discovery", tags=["discovery"])
 
@@ -71,6 +75,17 @@ async def discovery_chat(
     coupons = await get_applicable_coupons(db, [p["cid"] for p in products])
     answer, mode = await run_discovery(payload.message, products, context, reviews, coupons)
     add_exchange(payload.session_id, payload.message, answer)
+    try:
+        await log_chat(
+            db,
+            message=payload.message,
+            products=products,
+            mode=mode,
+            session_id=payload.session_id,
+            userId=current_user.id if current_user else None,
+        )
+    except Exception:
+        logger.exception("Failed to persist chat log entry")
     return ChatResponse(
         answer=answer, products=products, coupons=[coupon_to_dict(c) for c in coupons], mode=mode
     )
