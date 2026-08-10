@@ -74,7 +74,7 @@ export const StoreProvider = ({ children }) => {
   const loadAdminData = useCallback(async () => {
     try {
       const [admin, userList, adminList, orderList] = await Promise.all([
-        api.get('/auth/me'),
+        api.get('/admin/me'),
         api.get('/admin/users'),
         api.get('/admin/admins'),
         api.get('/admin/orders')

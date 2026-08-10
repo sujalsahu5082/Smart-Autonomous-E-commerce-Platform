@@ -9,6 +9,14 @@ async def test_admin_stats_and_users(client, admin_token):
     assert body["categories"] == 0
     assert body["admins"] == 1
 
+    resp_admin_me = await client.get("/api/admin/me", headers=auth)
+    assert resp_admin_me.status_code == 200
+    assert resp_admin_me.json()["email"] == "admin@smartecommerce.com"
+
+    resp_auth_me = await client.get("/api/auth/me", headers=auth)
+    assert resp_auth_me.status_code == 200
+    assert resp_auth_me.json()["email"] == "admin@smartecommerce.com"
+
     await client.post(
         "/api/auth/register",
         json={"name": "User A", "email": "a@example.com", "password": "secret123", "phone": "1111111111"},

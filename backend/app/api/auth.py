@@ -3,7 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 
-from app.api.deps import DbSession, get_current_user
+from app.api.deps import DbSession, get_current_user, get_current_user_or_admin
 from app.core.security import create_access_token, hash_password, verify_password
 from app.models import Admin, User
 from app.schemas.admin import AdminLogin, AdminLoginResponse, AdminOut
@@ -41,9 +41,11 @@ async def login(payload: UserLogin, db: DbSession):
     return _build_login_response(user)
 
 
-@router.get("/me", response_model=UserOut)
-async def me(current_user: Annotated[User, Depends(get_current_user)]):
-    return current_user
+@router.get("/me")
+async def me(account: Annotated[User | Admin, Depends(get_current_user_or_admin)]):
+    if isinstance(account, Admin):
+        return AdminOut.model_validate(account)
+    return UserOut.model_validate(account)
 
 
 @router.put("/me", response_model=UserOut)
